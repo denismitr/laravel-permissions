@@ -2,6 +2,8 @@
 
 namespace Denismitr\Permissions;
 
+use Gate;
+use Denismitr\Permissions\Models\Permission;
 use Illuminate\Support\ServiceProvider;
 
 class PermissionsServiceProvider extends ServiceProvider
@@ -14,6 +16,12 @@ class PermissionsServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadMigrationsFrom(__DIR__ . '/../migrations');
+
+        Permission::get()->map(function ($permission) {
+            Gate::define($permission->name, function ($user) use ($permission) {
+                return $user->hasPermissionTo($permission);
+            });
+        });
     }
 
     /**
