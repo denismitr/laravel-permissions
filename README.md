@@ -74,4 +74,4 @@ Plus a bonus a __blade__ `role` directive:
 ### Author
 
 Denis Mitrofanov
-[![TheCollection.ru](https://thecollection.ru)]
+[TheCollection.ru](https://thecollection.ru)
