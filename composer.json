@@ -1,0 +1,21 @@
+{
+    "name": "denismitr/laravel-permissions",
+    "description": "A Laravel User Roles And Permissions Package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Denis Mitrofanov",
+            "email": "denis.mitr@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Denismitr\\Permissions\\": "src"
+        }
+    },
+    "require": {
+        "php": ">=7.0.0",
+        "illuminate/database": ">= 5.0",
+        "illuminate/support": ">= 5.0"
+    }
+}
