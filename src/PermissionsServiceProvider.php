@@ -17,12 +17,15 @@ class PermissionsServiceProvider extends ServiceProvider
     public function boot(\Illuminate\Routing\Router $router)
     {
         $this->loadMigrationsFrom(__DIR__ . '/../migrations');
-
-        Permission::get()->map(function ($permission) {
-            Gate::define($permission->name, function ($user) use ($permission) {
-                return $user->hasPermissionTo($permission);
-            });
-        });
+		
+		
+		try {			
+			Permission::get()->map(function ($permission) {
+				Gate::define($permission->name, function ($user) use ($permission) {
+					return $user->hasPermissionTo($permission);
+				});
+			});
+		} catch(\Throwable $t) {}
 
         Blade::directive('role', function($role) {
             return "<?php if(auth()->check() && auth()->user()->hasRole({$role})): ?>";
