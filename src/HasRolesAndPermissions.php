@@ -5,13 +5,32 @@ namespace Denismitr\Permissions;
 use Denismitr\Permissions\Models\Permission;
 use Denismitr\Permissions\Models\Role;
 
-trait HasPermissionsTrait
+trait HasRolesAndPermissions
 {
+    /**
+     * Check if the user has a given permission
+     *
+     * @param  Denismitr\Permissions\Models\Permission|string  $permission
+     * @return bool
+     */
     public function hasPermissionTo($permission)
     {
+        if (is_string($permission)) {
+            $permission = Permission::where('name', $name);
+        }
+
+        if (! $permission) {
+            return false;
+        }
+
         return $this->hasPermissionThroughRole($permission) || $this->hasPermission($permission);
     }
 
+    /**
+     * Give the user a certain permission|s
+     * @param  string $permissions
+     * @return $this
+     */
     public function givePermissionTo(...$permissions)
     {
         $permissions = $this->getAllPermissions(array_flatten($permissions));
@@ -31,6 +50,22 @@ trait HasPermissionsTrait
         return $this;
     }
 
+    /**
+     * Give all permissions to user
+     *
+     * @return $this
+     */
+    public function grantAllPermissions()
+    {
+        $permission = new Permission;
+        $permission->name = 'all';
+
+        $this->permissions()->saveMany([$permission]);
+
+        return $this;
+    }
+
+
     public function withdrawPermissionTo(...$permissions)
     {
         $permissions = $this->getAllPermissions(array_flatten($permissions));
@@ -45,6 +80,42 @@ trait HasPermissionsTrait
         return $this->givePermissionTo($permissions);
     }
 
+    /**
+     * Give a role to the user
+     *
+     * @param  string $roles
+     * @return $this
+     */
+    public function assignRole(...$roles)
+    {
+        foreach ($roles as $role) {
+            if ( ! $this->hasRole($role) ) {
+                $this->roles()->create([
+                    'name' => $role
+                ]);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Alias for hasRole
+     *
+     * @param  string $roles
+     * @return bool
+     */
+    public function is(...$roles)
+    {
+        return $this->hasRole(...$roles);
+    }
+
+    /**
+     * Check if user has role
+     *
+     * @param  string $roles
+     * @return bool
+     */
     public function hasRole(...$roles)
     {
         foreach ($roles as $role) {

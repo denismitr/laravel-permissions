@@ -37,7 +37,7 @@ Creating the __CRUD__ and populating thoses tables is up to you.
 First include `HasPermissionsTrait` trait into the `User` model like so:
 
 ```php
-use ..., HasPermissionsTrait;
+use ..., HasRolesAndPermissions;
 ```
 
 To give permissions to a user:
@@ -54,6 +54,10 @@ $user->withdrawPermissionTo('delete post', 'edit post');
 To check for a role:
 ```php
 $user->hasRole('admin');
+```
+or
+```php
+$user->is('admin');
 ```
 
 To check for permissions:
