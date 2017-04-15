@@ -12,4 +12,12 @@ class Permission extends Model
     {
         return $this->belongsToMany(Role::class, 'roles_permissions');
     }
+
+
+    public static function fromName($name)
+    {
+        return self::updateOrCreate([
+            'name' => $name
+        ]);
+    }
 }

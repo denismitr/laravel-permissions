@@ -14,16 +14,8 @@ trait HasRolesAndPermissions
      * @param  Denismitr\Permissions\Models\Permission|string  $permission
      * @return bool
      */
-    public function hasPermissionTo($permission)
+    public function hasPermissionTo(string $permission)
     {
-        if (is_string($permission)) {
-            $permission = Permission::where('name', $name);
-        }
-
-        if (! $permission) {
-            return false;
-        }
-
         return $this->hasPermissionThroughRole($permission) || $this->hasPermission($permission);
     }
 
@@ -34,19 +26,17 @@ trait HasRolesAndPermissions
      */
     public function givePermissionTo(...$permissions)
     {
-        $permissions = $this->getAllPermissions(array_flatten($permissions));
-
-        if ($permissions === null) {
-            return $this;
-        }
-
         foreach ($permissions as $key => $permission) {
             if ($this->hasPermissionTo($permission)) {
                 unset($permissions[$key]);
+            } else {
+                $permissions[$key] = Permission::fromName($permission);
             }
         }
 
         $this->permissions()->saveMany($permissions);
+
+        $this->load('permissions');
 
         return $this;
     }
@@ -58,10 +48,11 @@ trait HasRolesAndPermissions
      */
     public function grantAllPermissions()
     {
-        $permission = new Permission;
-        $permission->name = 'all';
+        $permission = Permission::fromName('all');
 
         $this->permissions()->saveMany([$permission]);
+
+        $this->load('permissions');
 
         return $this;
     }
@@ -119,32 +110,40 @@ trait HasRolesAndPermissions
         return false;
     }
 
-
+    /**
+     *  Get roles of the user
+     *
+     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function roles()
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class, 'users_roles');
     }
 
-
+    /**
+     *  Get permissions for user
+     *
+     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function permissions()
     {
         return $this->belongsToMany(Permission::class, 'users_permissions');
     }
 
-    protected function hasPermissionThroughRole(Permission $permission)
+    protected function hasPermissionThroughRole(string $permission)
     {
-        foreach ($permission->roles as $role) {
-            if ($this->roles->contains($role)) {
-                return true;
-            }
-        }
+        // foreach ($permission->roles as $role) {
+        //     if ($this->roles->contains($role)) {
+        //         return true;
+        //     }
+        // }
 
         return false;
     }
 
-    protected function hasPermission(Permission $permission)
+    protected function hasPermission(string $permission)
     {
-        return (bool) $this->permissions->where('name', $permission->name)->count();
+        return (bool) $this->permissions->where('name', $permission)->count();
     }
 
     protected function getAllPermissions(array $permissions)

@@ -28,7 +28,7 @@ Then run `php artisan migrate` and the following _5_ tables will be created:
 * roles
 * roles_permissions
 * users_permissions
-* users_roles
+* role_user
 
 Creating the __CRUD__ and populating thoses tables is up to you.
 
