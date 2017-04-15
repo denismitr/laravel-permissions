@@ -55,10 +55,6 @@ To check for a role:
 ```php
 $user->hasRole('admin');
 ```
-or
-```php
-$user->is('admin');
-```
 
 To check for permissions:
 ```php

@@ -2,6 +2,7 @@
 
 namespace Denismitr\Permissions;
 
+use App\User;
 use Denismitr\Permissions\Models\Permission;
 use Denismitr\Permissions\Models\Role;
 
@@ -90,24 +91,15 @@ trait HasRolesAndPermissions
     {
         foreach ($roles as $role) {
             if ( ! $this->hasRole($role) ) {
-                $this->roles()->create([
-                    'name' => $role
-                ]);
+                $role = Role::fromName($role);
+
+                $this->roles()->attach($role);
+
+                $this->load('roles');
             }
         }
 
         return $this;
-    }
-
-    /**
-     * Alias for hasRole
-     *
-     * @param  string $roles
-     * @return bool
-     */
-    public function is(...$roles)
-    {
-        return $this->hasRole(...$roles);
     }
 
     /**
@@ -127,10 +119,12 @@ trait HasRolesAndPermissions
         return false;
     }
 
+
     public function roles()
     {
-        return $this->belongsToMany(Role::class, 'users_roles');
+        return $this->belongsToMany(Role::class);
     }
+
 
     public function permissions()
     {
