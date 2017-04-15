@@ -34,8 +34,48 @@ class Role extends Model
     }
 
 
+    /**
+     *  Get users who belong to this role
+     *
+     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
     public function users()
     {
         return $this->belongsToMany(User::class);
+    }
+
+    /**
+     *  Give role a permission
+     *
+     * @param  string $permissions
+     * @return $this
+     */
+    public function givePermissionTo(...$permissions)
+    {
+        foreach ($permissions as $key => $permission) {
+            if ($this->hasPermissionTo($permission)) {
+                unset($permissions[$key]);
+            } else {
+                $permissions[$key] = Permission::fromName($permission);
+            }
+        }
+
+        $this->permissions()->saveMany($permissions);
+
+        $this->load('permissions');
+
+        return $this;
+    }
+
+
+    /**
+     *  Verify if role has a permission
+     *
+     * @param  string $permission
+     * @return bool
+     */
+    public function hasPermissionTo(string $permission)
+    {
+        return (bool) $this->permissions->where('name', $permission)->count();
     }
 }
