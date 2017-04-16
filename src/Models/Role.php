@@ -16,11 +16,17 @@ class Role extends Model
      * @param  string $name
      * @return Illuminate\Database\Eloquent\Model
      */
-    public static function fromName($name)
+    public static function fromName(string $name)
     {
         return self::updateOrCreate([
             'name' => $name
         ]);
+    }
+
+
+    public static function byName(string $name)
+    {
+        return self::where('name', $name)->first();
     }
 
     /**

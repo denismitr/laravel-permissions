@@ -22,13 +22,18 @@ Then if you need to use middleware, you can add a `role` middleware to your Http
 'role' => \Denismitr\Permissions\Middleware\RoleMiddleware::class
 ```
 
+You can utilize an Interface
+```php
+Denismitr\Permissions\Contracts\RolesAndPermissionsInterface::class
+```
+
 Then run `php artisan migrate` and the following _5_ tables will be created:
 
 * permissions
 * roles
 * roles_permissions
 * users_permissions
-* role_user
+* users_roles
 
 Creating the __CRUD__ and populating thoses tables is up to you.
 
@@ -58,7 +63,16 @@ $user->hasRole('admin');
 
 To check for permissions:
 ```php
+$user->hasPermissionTo('edit post', 'delete post');
 $user->can('delete post');
+```
+
+Attention!!! for compatibility reasons the ```can``` method can support only single ability argument
+
+Create roles:
+```php
+$adminRole = Role::fromName('admin');
+$adminRole->givePermissionTo('add post', 'delete post');
 ```
 
 You can specify any names of the roles and permissions.

@@ -14,9 +14,24 @@ trait HasRolesAndPermissions
      * @param  Denismitr\Permissions\Models\Permission|string  $permission
      * @return bool
      */
-    public function hasPermissionTo(string $permission)
+    public function hasPermissionTo(...$permissions)
     {
-        return $this->hasPermissionThroughRole($permission) || $this->hasPermission($permission);
+        foreach ($permissions as $name) {
+            if ( ! $this->hasPermissionThroughRole($name) && ! $this->hasPermission($name)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function can($ability, $arguments = [])
+    {
+        if ($this->hasPermissionTo($ability)) {
+            return true;
+        }
+
+        return parent::can($ability, $arguments);
     }
 
     /**
@@ -57,19 +72,34 @@ trait HasRolesAndPermissions
         return $this;
     }
 
-
+    /**
+     * Strip user from a givern permission
+     *
+     * @param  string $permissions
+     * @return $this
+     */
     public function withdrawPermissionTo(...$permissions)
     {
         $permissions = $this->getAllPermissions(array_flatten($permissions));
 
         $this->permissions()->detach($permissions);
+
+        $this->load('permissions');
+
+        return $this;
     }
 
+    /**
+     * Update permission for a user
+     *
+     * @param  [string] $permissions
+     * @return $this
+     */
     public function updatePermissions(...$permissions)
     {
         $this->permissions()->detach();
 
-        return $this->givePermissionTo($permissions);
+        return $this->givePermissionTo(...$permissions);
     }
 
     /**
@@ -130,20 +160,38 @@ trait HasRolesAndPermissions
         return $this->belongsToMany(Permission::class, 'users_permissions');
     }
 
-    protected function hasPermissionThroughRole(string $permission)
+    /**
+     * See if user has permission through roles
+     *
+     * @param  string  $name
+     * @return bool
+     */
+    protected function hasPermissionThroughRole(string $name)
     {
-        // foreach ($permission->roles as $role) {
-        //     if ($this->roles->contains($role)) {
-        //         return true;
-        //     }
-        // }
+        $permission = Permission::byName($name);
+
+        if (! $permission) {
+            return false;
+        }
+
+        foreach ($permission->roles as $role) {
+            if ($this->roles->contains($role)) {
+                return true;
+            }
+        }
 
         return false;
     }
 
-    protected function hasPermission(string $permission)
+    /**
+     * See if user has permission by name
+     *
+     * @param  string  $name
+     * @return bool
+     */
+    protected function hasPermission(string $name)
     {
-        return (bool) $this->permissions->where('name', $permission)->count();
+        return (bool) $this->permissions->where('name', $name)->count();
     }
 
     protected function getAllPermissions(array $permissions)
