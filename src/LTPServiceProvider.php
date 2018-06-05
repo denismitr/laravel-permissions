@@ -1,13 +1,13 @@
 <?php
 
-namespace Denismitr\Permissions;
+namespace Denismitr\LTP;
 
 use Gate;
-use Denismitr\Permissions\Models\Permission;
+use Denismitr\LTP\Models\Permission;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 
-class PermissionsServiceProvider extends ServiceProvider
+class LTPServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.

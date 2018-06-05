@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Denismitr\Permissions;
+namespace Denismitr\LTP;
 
 
 use Illuminate\Support\Collection;

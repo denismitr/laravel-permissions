@@ -1,18 +1,19 @@
 <?php
 
-namespace Denismitr\Permissions\Models;
+namespace Denismitr\LTP\Models;
 
-use Denismitr\Permissions\Contracts\UserPermission;
-use Denismitr\Permissions\Exception\PermissionAlreadyExists;
-use Denismitr\Permissions\Exception\PermissionDoesNotExist;
-use Denismitr\Permissions\Guard;
-use Denismitr\Permissions\PermissionLoader;
+use Denismitr\LTP\Contracts\HasGuard;
+use Denismitr\LTP\Contracts\UserPermission;
+use Denismitr\LTP\Exceptions\PermissionAlreadyExists;
+use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
+use Denismitr\LTP\Guard;
+use Denismitr\LTP\PermissionLoader;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 
-class Permission extends Model implements UserPermission
+class Permission extends Model implements UserPermission, HasGuard
 {
     protected $guarded = ['id'];
 
@@ -22,6 +23,14 @@ class Permission extends Model implements UserPermission
         $attributes['guard'] = $attributes['guard'] ?? config('auth.defaults.guard');
 
         parent::__construct($attributes);
+    }
+
+    /**
+     * @return string
+     */
+    public function getGuard(): string
+    {
+        return $this->guard;
     }
 
     public static function create(array $attributes = [])
@@ -57,8 +66,7 @@ class Permission extends Model implements UserPermission
     public function roles(): BelongsToMany
     {
         return $this
-            ->belongsToMany(Role::class, 'role_permissions')
-            ->withPivot('team_id');
+            ->belongsToMany(Role::class, 'role_permissions');
     }
 
     /**

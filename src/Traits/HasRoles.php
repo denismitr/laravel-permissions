@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Denismitr\Permissions\Traits;
+namespace Denismitr\LTP\Traits;
 
 
-use Denismitr\Permissions\Models\Role;
+use Denismitr\LTP\Models\Role;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 trait HasRoles

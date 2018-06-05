@@ -1,14 +1,14 @@
 <?php
 
 
-namespace Denismitr\Permissions\Test;
+namespace Denismitr\LTP\Test;
 
 
-use Denismitr\Permissions\Models\Permission;
-use Denismitr\Permissions\Models\Role;
-use Denismitr\Permissions\PermissionsServiceProvider;
-use Denismitr\Permissions\Test\Models\Admin;
-use Denismitr\Permissions\Test\Models\User;
+use Denismitr\LTP\Models\Permission;
+use Denismitr\LTP\Models\Role;
+use Denismitr\LTP\LTPServiceProvider;
+use Denismitr\LTP\Test\Models\Admin;
+use Denismitr\LTP\Test\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
@@ -71,7 +71,7 @@ abstract class TestCase extends OrchestraTestCase
     protected function getPackageProviders($app)
     {
         return [
-            PermissionsServiceProvider::class
+            LTPServiceProvider::class
         ];
     }
 
@@ -123,7 +123,7 @@ abstract class TestCase extends OrchestraTestCase
         $this->rolePremium = $app[Role::class]->create(['name' => 'ROLE_PREMIUM']);
         $this->roleAdmin = $app[Role::class]->create(['name' => 'ROLE_ADMIN', 'guard' => 'admin']);
 
-        $this->editArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles']);
+        $this->editArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles', 'guard' => 'web']);
         $this->editNewsPermission = $app[Permission::class]->create(['name' => 'edit-news']);
         $this->editBlogPermission = $app[Permission::class]->create(['name' => 'edit-blog']);
         $this->adminPermission = $app[Permission::class]->create(['name' => 'admin-actions', 'guard' => 'admin']);

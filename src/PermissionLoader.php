@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Denismitr\Permissions;
+namespace Denismitr\LTP;
 
 
-use Denismitr\Permissions\Models\Permission;
+use Denismitr\LTP\Models\Permission;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Collection;
@@ -38,8 +38,9 @@ class PermissionLoader
      */
     public function getPermissions(): Collection
     {
-        return $this->cache->remember($this->cacheKey, config('permissions.cache_expiration_time'), function () {
-            return app(Permission::class)->with('role')->get();
-        });
+        return app(Permission::class)->with('roles')->get();
+//        return $this->cache->remember($this->cacheKey, config('permissions.cache_expiration_time'), function () {
+//            return app(Permission::class)->with('role')->get();
+//        });
     }
 }

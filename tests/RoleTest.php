@@ -1,15 +1,16 @@
 <?php
 
 
-namespace Denismitr\Permissions\Test;
+namespace Denismitr\LTP\Test;
 
 
-use Denismitr\Permissions\Exception\PermissionDoesNotExist;
-use Denismitr\Permissions\Exception\RoleAlreadyExists;
-use Denismitr\Permissions\Models\Permission;
-use Denismitr\Permissions\Models\Role;
-use Denismitr\Permissions\Test\Models\Admin;
-use Denismitr\Permissions\Test\Models\User;
+use Denismitr\LTP\Exceptions\GuardMismatch;
+use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
+use Denismitr\LTP\Exceptions\RoleAlreadyExists;
+use Denismitr\LTP\Models\Permission;
+use Denismitr\LTP\Models\Role;
+use Denismitr\LTP\Test\Models\Admin;
+use Denismitr\LTP\Test\Models\User;
 
 class RoleTest extends TestCase
 {
@@ -48,9 +49,9 @@ class RoleTest extends TestCase
     /** @test */
     public function it_can_be_given_a_permission()
     {
-        $this->roleUser->givePermissionTo('edit-article');
+        $this->roleUser->givePermissionTo('edit-articles');
 
-        $this->assertTrue($this->roleUser->hasPermissionTo('edit-article'));
+        $this->assertTrue($this->roleUser->hasPermissionTo('edit-articles'));
     }
     
     /** @test */
@@ -59,5 +60,9 @@ class RoleTest extends TestCase
         $this->expectException(PermissionDoesNotExist::class);
 
         $this->roleUser->givePermissionTo('admin-actions');
+
+        $this->expectException(GuardMismatch::class);
+
+        $this->roleUser->givePermissionTo($this->adminPermission);
     }
 }

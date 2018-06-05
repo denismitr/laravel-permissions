@@ -1,15 +1,18 @@
 <?php
 
-namespace Denismitr\Permissions\Models;
+namespace Denismitr\LTP\Models;
 
 use App\User;
-use Denismitr\Permissions\Exception\RoleAlreadyExists;
-use Denismitr\Permissions\Exception\RoleDoesNotExist;
-use Denismitr\Permissions\Guard;
+use Denismitr\LTP\Contracts\HasGuard;
+use Denismitr\LTP\Exceptions\GuardMismatch;
+use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
+use Denismitr\LTP\Exceptions\RoleAlreadyExists;
+use Denismitr\LTP\Exceptions\RoleDoesNotExist;
+use Denismitr\LTP\Guard;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-class Role extends Model
+class Role extends Model implements HasGuard
 {
     protected $guarded = [];
 
@@ -109,13 +112,15 @@ class Role extends Model
      */
     public function givePermissionTo(...$permissions)
     {
-        foreach ($permissions as $key => $permission) {
-            if ($this->hasPermissionTo($permission)) {
-                unset($permissions[$key]);
-            } else {
-                $permissions[$key] = Permission::create(['name' => $permission]);
-            }
-        }
+        $permissions = collect($permissions)
+            ->flatten()
+            ->map(function ($permission) {
+                return $this->getPermission($permission);
+            })
+            ->each(function($permission) {
+                $this->verifySharedGuard($permission);
+            })
+            ->all();
 
         $this->permissions()->saveMany($permissions);
 
@@ -124,6 +129,13 @@ class Role extends Model
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getGuard(): string
+    {
+        return $this->guard;
+    }
 
     /**
      *  Verify if role has a permission
@@ -134,5 +146,72 @@ class Role extends Model
     public function hasPermissionTo(string $permission): bool
     {
         return !! $this->permissions->where('name', $permission)->count();
+    }
+
+    /**
+     * @param $permission
+     * @return Permission
+     * @throws PermissionDoesNotExist
+     * @throws \ReflectionException
+     */
+    protected function getPermission($permission): Permission
+    {
+        if (is_numeric($permission)) {
+            return app(Permission::class)->findById($permission, $this->getDefaultGuard());
+        }
+
+        if (is_string($permission)) {
+            return app(Permission::class)->findByName($permission, $this->getDefaultGuard());
+        }
+
+        throw new PermissionDoesNotExist("Permission {$permission} is invalid or does not exist.");
+    }
+
+    /**
+     * @param array $permissions
+     * @return mixed
+     * @throws PermissionDoesNotExist
+     * @throws \ReflectionException
+     */
+    public function getPermissions(array $permissions)
+    {
+        if (! empty($permissions) && is_string($permissions[0])) {
+            return app(Permission::class)
+                ->whereIn('name', $permissions)
+                ->whereIn('guard', $this->getGuards())
+                ->get();
+        }
+
+        throw new PermissionDoesNotExist("Permissions list is invalid");
+    }
+
+    /**
+     * @param HasGuard $roleOrPermission
+     * @throws GuardMismatch
+     * @throws \ReflectionException
+     */
+    protected function verifySharedGuard(HasGuard $roleOrPermission)
+    {
+        if ( ! Guard::getNames($this)->contains($roleOrPermission->getGuard()) ) {
+            throw GuardMismatch::create($roleOrPermission->getGuard(), Guard::getNames($this));
+        }
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     * @throws \ReflectionException
+     */
+    protected function getGuards()
+    {
+        return Guard::getNames($this);
+    }
+
+    /**
+     * @return string
+     * @throws \ReflectionException
+     */
+    protected function getDefaultGuard(): string
+    {
+        return Guard::getDefault($this);
     }
 }

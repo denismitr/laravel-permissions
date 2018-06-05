@@ -1,13 +1,13 @@
 <?php
 
-namespace Denismitr\Permissions\Contracts;
+namespace Denismitr\LTP\Contracts;
 
 interface RolesAndPermissionsInterface
 {
     /**
      * Check if the user has a given permission
      *
-     * @param  Denismitr\Permissions\Models\Permission|string  $permission
+     * @param  Denismitr\LTP\Models\Permission|string  $permission
      * @return bool
      */
     public function hasPermissionTo(...$permissions);

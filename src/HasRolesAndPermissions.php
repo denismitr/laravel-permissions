@@ -1,17 +1,15 @@
 <?php
 
-namespace Denismitr\Permissions;
+namespace Denismitr\LTP;
 
 use App\User;
-use Denismitr\Permissions\Models\Permission;
-use Denismitr\Permissions\Models\Role;
+use Denismitr\LTP\Models\Permission;
+use Denismitr\LTP\Models\Role;
 
 trait HasRolesAndPermissions
 {
     /**
-     * Check if the user has a given permission
-     *
-     * @param  Denismitr\Permissions\Models\Permission|string  $permission
+     * @param array ...$permissions
      * @return bool
      */
     public function hasPermissionTo(...$permissions)

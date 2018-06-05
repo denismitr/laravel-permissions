@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Denismitr\Permissions\Test\Models;
+namespace Denismitr\LTP\Test\Models;
 
 
-use Denismitr\Permissions\Traits\HasRoles;
+use Denismitr\LTP\Traits\HasRoles;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
