@@ -1,3 +1,5 @@
+## Version 1.* is abandoned. Version 2 is coming
+
 ## Laravel Permissions
 
 This is a package to integrate with Laravel 5.*
