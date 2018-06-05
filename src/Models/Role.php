@@ -3,7 +3,10 @@
 namespace Denismitr\Permissions\Models;
 
 use App\User;
+use Denismitr\Permissions\Exception\RoleDoesNotExist;
+use Denismitr\Permissions\Guard;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Role extends Model
 {
@@ -23,31 +26,64 @@ class Role extends Model
         ]);
     }
 
-
-    public static function byName(string $name)
+    /**
+     * @param string $name
+     * @param string|null $guard
+     * @return Role
+     * @throws RoleDoesNotExist
+     * @throws \ReflectionException
+     */
+    public static function findByName(string $name, string $guard = null): self
     {
-        return self::where('name', $name)->first();
+        $guard = $guard ?: Guard::getDefault($guard);
+
+        $role = static::query()->whereName($name)->whereGuard($guard)->first();
+
+        if ( ! $role ) {
+            throw RoleDoesNotExist::create($name, $guard);
+        }
+
+        return $role;
     }
 
     /**
-     * Belongs to many permissions
-     *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @param int $id
+     * @return Role
+     * @throws RoleDoesNotExist
+     */
+    public static function findById(int $id): self
+    {
+        /** @var Role $role */
+        $role = static::query()->find($id);
+
+        if ( ! $role ) {
+            throw RoleDoesNotExist::createWithId($id);
+        }
+
+        return $role;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function permissions()
     {
-        return $this->belongsToMany(Permission::class, 'roles_permissions');
+        return $this->belongsToMany(Permission::class, 'role_permissions');
     }
 
 
     /**
-     *  Get users who belong to this role
-     *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
      */
-    public function users()
+    public function users(): MorphToMany
     {
-        return $this->belongsToMany(User::class);
+        return $this->morphedByMany(
+            Guard::getModelFor($this->attributes['guard']),
+            'user',
+            'user_roles',
+            'role_id',
+            'user_id'
+        );
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php
 
-if ( ! function_exists('get_model_for_guard') ) {
-    function get_model_for_guard(string $guard): string
+if ( ! function_exists('getModelForGuard') ) {
+    function getModelForGuard(string $guard): string
     {
         return collect(config('auth.guard'))
             ->map(function ($guard) {

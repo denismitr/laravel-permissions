@@ -42,6 +42,18 @@ class Guard
     }
 
     /**
+     * @param string $guard
+     * @return string
+     */
+    public static function getModelFor(string $guard): string
+    {
+        return collect(config('auth.guard'))
+            ->map(function ($guard) {
+                return config("auth.providers.{$guard['provider']}.model");
+            })->get($guard);
+    }
+
+    /**
      * @param $class
      * @return string
      * @throws \ReflectionException
