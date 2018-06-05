@@ -44,8 +44,9 @@ class Guard
     /**
      * @param $class
      * @return string
+     * @throws \ReflectionException
      */
-    public static function getDefaultName($class): string
+    public static function getDefault($class): string
     {
         $default = config('auth.defaults.guard');
 
