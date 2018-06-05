@@ -130,6 +130,30 @@ class Role extends Model implements HasGuard
     }
 
     /**
+     * @param array ...$permissions
+     * @return Role
+     */
+    public function syncPermissions(...$permissions)
+    {
+        $this->permissions()->detach();
+
+        return $this->givePermissionTo($permissions);
+    }
+
+    /**
+     * @param array ...$permissions
+     * @return $this
+     * @throws PermissionDoesNotExist
+     * @throws \ReflectionException
+     */
+    public function revokePermissionTo(...$permissions)
+    {
+        $this->permissions()->detach($this->getPermissions($permissions));
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getGuard(): string
@@ -143,8 +167,12 @@ class Role extends Model implements HasGuard
      * @param  string $permission
      * @return bool
      */
-    public function hasPermissionTo(string $permission): bool
+    public function hasPermissionTo($permission): bool
     {
+        if (is_object($permission)) {
+            return $this->permissions->contains('id', $permission->id);
+        }
+
         return !! $this->permissions->where('name', $permission)->count();
     }
 
@@ -162,6 +190,10 @@ class Role extends Model implements HasGuard
 
         if (is_string($permission)) {
             return app(Permission::class)->findByName($permission, $this->getDefaultGuard());
+        }
+
+        if ($permission instanceof Permission) {
+            return $permission;
         }
 
         throw new PermissionDoesNotExist("Permission {$permission} is invalid or does not exist.");

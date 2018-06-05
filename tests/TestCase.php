@@ -123,7 +123,7 @@ abstract class TestCase extends OrchestraTestCase
         $this->rolePremium = $app[Role::class]->create(['name' => 'ROLE_PREMIUM']);
         $this->roleAdmin = $app[Role::class]->create(['name' => 'ROLE_ADMIN', 'guard' => 'admin']);
 
-        $this->editArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles', 'guard' => 'web']);
+        $this->editArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles']);
         $this->editNewsPermission = $app[Permission::class]->create(['name' => 'edit-news']);
         $this->editBlogPermission = $app[Permission::class]->create(['name' => 'edit-blog']);
         $this->adminPermission = $app[Permission::class]->create(['name' => 'admin-actions', 'guard' => 'admin']);
