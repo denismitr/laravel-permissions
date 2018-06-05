@@ -5,26 +5,32 @@ namespace Denismitr\Permissions;
 
 
 use Denismitr\Permissions\Models\Permission;
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Collection;
 
 class PermissionLoader
 {
     /** @var Gate */
-    private $gate;
+    protected $gate;
 
     /** @var Repository */
-    private $repository;
+    protected $cache;
+
+    /**
+     * @var string
+     */
+    protected $cacheKey = 'denismitr.permissions.cache';
 
     /**
      * PermissionLoader constructor.
      * @param Gate $gate
-     * @param Repository $repository
+     * @param Repository $cache
      */
-    public function __construct(Gate $gate, Repository $repository)
+    public function __construct(Gate $gate, Repository $cache)
     {
         $this->gate = $gate;
-        $this->repository = $repository;
+        $this->cache = $cache;
     }
 
     /**

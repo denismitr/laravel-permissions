@@ -47,7 +47,7 @@ class Guard
      */
     public static function getModelFor(string $guard): string
     {
-        return collect(config('auth.guard'))
+        return collect(config('auth.guards'))
             ->map(function ($guard) {
                 return config("auth.providers.{$guard['provider']}.model");
             })->get($guard);

@@ -13,17 +13,28 @@ class Role extends Model
     protected $guarded = [];
 
     /**
-     *  Create new instance of Role with new name or old
-     *  one if not unique
-     *
-     * @param  string $name
-     * @return Illuminate\Database\Eloquent\Model
+     * Role constructor.
+     * @param array $attributes
+     * @throws \ReflectionException
      */
-    public static function fromName(string $name)
+    public function __construct(array $attributes = [])
     {
-        return self::updateOrCreate([
-            'name' => $name
-        ]);
+        $attributes['guard'] = $attributes['guard'] ?? Guard::getDefault(static::class);
+
+        parent::__construct($attributes);
+    }
+
+    /**
+     * @param array $attributes
+     * @return $this|Model
+     * @throws \ReflectionException
+     */
+    public static function create(array $attributes = [])
+    {
+        $attributes['guard'] = $attributes['guard'] ?? Guard::getDefault(static::class);
+        $attributes['team_id'] = $attributes['team_id'] ?? null;
+
+        return static::query()->create($attributes);
     }
 
     /**
