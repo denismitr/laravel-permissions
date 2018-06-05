@@ -7,7 +7,7 @@ use Denismitr\Permissions\Models\Permission;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 
-class RolesAndPermissionsServiceProvider extends ServiceProvider
+class PermissionsServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.

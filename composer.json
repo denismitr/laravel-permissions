@@ -1,21 +1,49 @@
 {
     "name": "denismitr/laravel-permissions",
-    "description": "A Laravel User Roles And Permissions Package",
+    "description": "Laravel Roles And Permissions Package with Teams support",
+    "keywords": ["denismitr", "roles", "permissions", "teams", "acl", "security"],
     "license": "MIT",
     "authors": [
         {
             "name": "Denis Mitrofanov",
-            "email": "denis.mitr@gmail.com"
+            "email": "denis.mitr@gmail.com",
+            "homepage": "https://thecollection.ru",
+            "role": "Developer"
         }
     ],
     "autoload": {
         "psr-4": {
             "Denismitr\\Permissions\\": "src"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Denismitr\\Permissions\\Test\\": "tests"
         }
     },
     "require": {
-        "php": ">=7.0.0",
+        "php": ">=7.1.0",
         "illuminate/database": ">= 5.0",
-        "illuminate/support": ">= 5.0"
+        "illuminate/auth": "~5.3.0|~5.4.0|~5.5.0|~5.6.0",
+        "illuminate/container": "~5.3.0|~5.4.0|~5.5.0|~5.6.0",
+        "illuminate/contracts": "~5.3.0|~5.4.0|~5.5.0|~5.6.0",
+        "illuminate/support": "~5.3.0|~5.4.0|~5.5.0|~5.6.0"
+    },
+    "required-dev": {
+        "orchestra/testbench": "~3.3.0|~3.4.2|^3.5.0",
+        "phpunit/phpunit" : "^5.7|6.2|^7.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Denismitr\\Permissions\\PermissionsServiceProvider"
+            ]
+        }
     }
 }
