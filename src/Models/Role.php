@@ -3,6 +3,7 @@
 namespace Denismitr\Permissions\Models;
 
 use App\User;
+use Denismitr\Permissions\Exception\RoleAlreadyExists;
 use Denismitr\Permissions\Exception\RoleDoesNotExist;
 use Denismitr\Permissions\Guard;
 use Illuminate\Database\Eloquent\Model;
@@ -27,12 +28,17 @@ class Role extends Model
     /**
      * @param array $attributes
      * @return $this|Model
+     * @throws RoleAlreadyExists
      * @throws \ReflectionException
      */
     public static function create(array $attributes = [])
     {
         $attributes['guard'] = $attributes['guard'] ?? Guard::getDefault(static::class);
         $attributes['team_id'] = $attributes['team_id'] ?? null;
+
+        if (static::whereName($attributes['name'])->whereGuard($attributes['guard'])->first()) {
+            throw RoleAlreadyExists::create($attributes['name'], $attributes['guard']);
+        }
 
         return static::query()->create($attributes);
     }
@@ -98,9 +104,7 @@ class Role extends Model
     }
 
     /**
-     *  Give role a permission
-     *
-     * @param  string $permissions
+     * @param array ...$permissions
      * @return $this
      */
     public function givePermissionTo(...$permissions)
@@ -109,7 +113,7 @@ class Role extends Model
             if ($this->hasPermissionTo($permission)) {
                 unset($permissions[$key]);
             } else {
-                $permissions[$key] = Permission::fromName($permission);
+                $permissions[$key] = Permission::create(['name' => $permission]);
             }
         }
 
@@ -127,8 +131,8 @@ class Role extends Model
      * @param  string $permission
      * @return bool
      */
-    public function hasPermissionTo(string $permission)
+    public function hasPermissionTo(string $permission): bool
     {
-        return (bool) $this->permissions->where('name', $permission)->count();
+        return !! $this->permissions->where('name', $permission)->count();
     }
 }

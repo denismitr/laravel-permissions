@@ -48,17 +48,17 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * @var Permission
      */
-    protected $testEditArticlesPermission;
+    protected $editArticlesPermission;
 
     /**
      * @var Permission
      */
-    protected $testEditNewsPermission;
+    protected $editNewsPermission;
 
     /**
      * @var Permission
      */
-    protected $testEditBlogPermission;
+    protected $editBlogPermission;
 
 
     public function setUp()
@@ -123,10 +123,10 @@ abstract class TestCase extends OrchestraTestCase
         $this->rolePremium = $app[Role::class]->create(['name' => 'ROLE_PREMIUM']);
         $this->roleAdmin = $app[Role::class]->create(['name' => 'ROLE_ADMIN', 'guard' => 'admin']);
 
-        $this->testEditArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles']);
-        $this->testEditNewsPermission = $app[Permission::class]->create(['name' => 'edit-news']);
-        $this->testEditBlogPermission = $app[Permission::class]->create(['name' => 'edit-blog']);
-        $this->adminPermission = $app[Permission::class]->create(['name' => 'admin-permission', 'guard' => 'admin']);
+        $this->editArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles']);
+        $this->editNewsPermission = $app[Permission::class]->create(['name' => 'edit-news']);
+        $this->editBlogPermission = $app[Permission::class]->create(['name' => 'edit-blog']);
+        $this->adminPermission = $app[Permission::class]->create(['name' => 'admin-actions', 'guard' => 'admin']);
     }
 
     /**
