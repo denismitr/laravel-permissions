@@ -7,14 +7,14 @@ use Denismitr\Permissions\Models\Permission;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 
-class PermissionsServiceProvider extends ServiceProvider
+class RolesAndPermissionsServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap the application services.
      *
      * @return void
      */
-    public function boot(\Illuminate\Routing\Router $router)
+    public function boot()
     {
         $this->loadMigrationsFrom(__DIR__ . '/../migrations');
 		
