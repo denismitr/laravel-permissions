@@ -154,34 +154,4 @@ class Role extends Model implements HasGuard, UserRole
 
         return !! $this->permissions->where('name', $permission)->count();
     }
-
-    /**
-     * @param HasGuard $roleOrPermission
-     * @throws GuardMismatch
-     * @throws \ReflectionException
-     */
-    protected function verifySharedGuard(HasGuard $roleOrPermission)
-    {
-        if ( ! Guard::getNames($this)->contains($roleOrPermission->getGuard()) ) {
-            throw GuardMismatch::create($roleOrPermission->getGuard(), Guard::getNames($this));
-        }
-    }
-
-    /**
-     * @return \Illuminate\Support\Collection
-     * @throws \ReflectionException
-     */
-    protected function getGuards()
-    {
-        return Guard::getNames($this);
-    }
-
-    /**
-     * @return string
-     * @throws \ReflectionException
-     */
-    protected function getDefaultGuard(): string
-    {
-        return Guard::getDefault($this);
-    }
 }

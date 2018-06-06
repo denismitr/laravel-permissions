@@ -7,10 +7,29 @@ namespace Denismitr\LTP\Traits;
 use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
 use Denismitr\LTP\Guard;
 use Denismitr\LTP\Models\Permission;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\Collection;
 
 trait HasPermissions
 {
+    public static function bootHasPermissions()
+    {
+        static::deleting(function ($model) {
+            if (method_exists($model, 'isForceDeleting') && ! $model->isForceDeleting()) {
+                return;
+            }
+
+            $model->permissions->detach();
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships and scopes
+    |--------------------------------------------------------------------------
+    */
+
     /**
      * A model may have multiple direct permissions.
      */
@@ -26,27 +45,50 @@ trait HasPermissions
     }
 
     /**
-     * @param array ...$permissions
-     * @return $this
+     * @param Builder $query
+     * @param $permissions
+     * @return Builder
      */
-    public function givePermissionTo(...$permissions)
+    public function scopePermission(Builder $query, $permissions): Builder
     {
-        $permissions = collect($permissions)
-            ->flatten()
-            ->map(function ($permission) {
-                return $this->getPermission($permission);
-            })
-            ->each(function($permission) {
-                Guard::verifyIsSharedBetween($permission, $this);
-            })
-            ->all();
+        $permissions = $this->resolvePermissions($permissions);
 
-        $this->permissions()->saveMany($permissions);
+        $rolesWithPermissions = $permissions->map(function($permission) {
+            return $permission->roles->all();
+        })->flatten()->unique();
 
-        $this->load('permissions');
+        return $query->where(function ($query) use ($permissions, $rolesWithPermissions) {
+            $query->whereHas('permissions', function ($query) use ($permissions) {
 
-        return $this;
+                $query->whereIn('permissions.id', $permissions->pluck('id'));
+//                foreach ($permissions as $permission) {
+//                    $query->where(
+//                        config('permissions.table_names.permissions').'.id',
+//                        $permission->id
+//                    );
+//                }
+            });
+
+//            if ($rolesWithPermissions->count() > 0) {
+//                $query->orWhereHas('roles', function ($query) use ($rolesWithPermissions) {
+//                    $query->where(function ($query) use ($rolesWithPermissions) {
+//                          foreach ($rolesWithPermissions as $role) {
+//                              $query->orWhere(
+//                                  config('permissions.table_names.roles').'.id',
+//                                  $role->id
+//                              );
+//                          }
+//                    });
+//                });
+//            }
+        });
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Getters
+    |--------------------------------------------------------------------------
+    */
 
     /**
      *  Verify if role has a permission
@@ -94,14 +136,59 @@ trait HasPermissions
      */
     public function getPermissions(array $permissions)
     {
-        if (! empty($permissions) && is_string($permissions[0])) {
-            return app(Permission::class)
-                ->whereIn('name', $permissions)
-                ->whereIn('guard', $this->getGuards())
-                ->get();
+        if (! empty($permissions) ) {
+            if (is_string($permissions[0])) {
+                return app(Permission::class)
+                    ->whereIn('name', $permissions)
+                    ->whereIn('guard', $this->getGuards())
+                    ->get();
+            }
+
+            if ($permissions[0] instanceof Permission) {
+                return $permissions;
+            }
         }
 
         throw new PermissionDoesNotExist("Permissions list is invalid");
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     * @throws \ReflectionException
+     */
+    protected function getGuards()
+    {
+        return Guard::getNames($this);
+    }
+
+    /**
+     * @return string
+     * @throws \ReflectionException
+     */
+    protected function getDefaultGuard(): string
+    {
+        return Guard::getDefault($this);
+    }
+
+    /**
+     * @param $permissions
+     * @return Collection
+     */
+    protected function resolvePermissions($permissions): Collection
+    {
+        if ($permissions instanceof Collection) {
+            return $permissions;
+        }
+
+        $permissions = collect($permissions);
+
+        return $permissions->map(function($permission) {
+            if ($permission instanceof Permission) {
+                return $permission;
+            }
+
+            return Permission::findByName($permission, $this->getDefaultGuard());
+        });
     }
 
     /*
@@ -122,14 +209,37 @@ trait HasPermissions
     }
 
     /**
-     * @param array ...$permissions
+     * @param $permission
      * @return $this
      * @throws PermissionDoesNotExist
      * @throws \ReflectionException
      */
-    public function revokePermissionTo(...$permissions)
+    public function revokePermissionTo($permission)
     {
-        $this->permissions()->detach($this->getPermissions($permissions));
+        $this->permissions()->detach($this->getPermission($permission));
+
+        return $this;
+    }
+
+    /**
+     * @param array ...$permissions
+     * @return $this
+     */
+    public function givePermissionTo(...$permissions)
+    {
+        $permissions = collect($permissions)
+            ->flatten()
+            ->map(function ($permission) {
+                return $this->getPermission($permission);
+            })
+            ->each(function($permission) {
+                Guard::verifyIsSharedBetween($permission, $this);
+            })
+            ->all();
+
+        $this->permissions()->saveMany($permissions);
+
+        $this->load('permissions');
 
         return $this;
     }
