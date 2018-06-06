@@ -7,6 +7,7 @@ namespace Denismitr\LTP\Traits;
 use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
 use Denismitr\LTP\Guard;
 use Denismitr\LTP\Models\Permission;
+use Denismitr\LTP\PermissionLoader;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
@@ -60,27 +61,26 @@ trait HasPermissions
         return $query->where(function ($query) use ($permissions, $rolesWithPermissions) {
             $query->whereHas('permissions', function ($query) use ($permissions) {
 
-                $query->whereIn('permissions.id', $permissions->pluck('id'));
-//                foreach ($permissions as $permission) {
-//                    $query->where(
-//                        config('permissions.table_names.permissions').'.id',
-//                        $permission->id
-//                    );
-//                }
+                foreach ($permissions as $permission) {
+                    $query->where(
+                        config('permissions.table_names.permissions').'.id',
+                        $permission->id
+                    );
+                }
             });
 
-//            if ($rolesWithPermissions->count() > 0) {
-//                $query->orWhereHas('roles', function ($query) use ($rolesWithPermissions) {
-//                    $query->where(function ($query) use ($rolesWithPermissions) {
-//                          foreach ($rolesWithPermissions as $role) {
-//                              $query->orWhere(
-//                                  config('permissions.table_names.roles').'.id',
-//                                  $role->id
-//                              );
-//                          }
-//                    });
-//                });
-//            }
+            if ($rolesWithPermissions->count() > 0) {
+                $query->orWhereHas('roles', function ($query) use ($rolesWithPermissions) {
+                    $query->where(function ($query) use ($rolesWithPermissions) {
+                          foreach ($rolesWithPermissions as $role) {
+                              $query->orWhere(
+                                  config('permissions.table_names.roles').'.id',
+                                  $role->id
+                              );
+                          }
+                    });
+                });
+            }
         });
     }
 
@@ -91,18 +91,49 @@ trait HasPermissions
     */
 
     /**
-     *  Verify if role has a permission
-     *
-     * @param  string $permission
+     * @param $permission
      * @return bool
+     * @throws \ReflectionException
      */
     public function hasPermissionTo($permission): bool
     {
-        if (is_object($permission)) {
-            return $this->permissions->contains('id', $permission->id);
+        if (is_string($permission)) {
+            $permission = app(Permission::class)->findByName(
+                $permission,
+                $this->getDefaultGuard()
+            );
         }
 
-        return !! $this->permissions->where('name', $permission)->count();
+        return $this->hasDirectPermission($permission) || $this->hasPermissionViaRole($permission);
+    }
+
+    protected function hasPermissionViaRole(Permission $permission): bool
+    {
+        return $this->hasRole($permission->roles);
+    }
+
+    /**
+     * @param $permission
+     * @return bool
+     * @throws \ReflectionException
+     */
+    public function hasDirectPermission($permission): bool
+    {
+        if (is_string($permission)) {
+            $permission = app(Permission::class)->findByName($permission, $this->getDefaultGuard());
+            if (! $permission) {
+                return false;
+            }
+        }
+
+        if (is_int($permission)) {
+            $permission = app(Permission::class)->findById($permission, $this->getDefaultGuard());
+            if (! $permission) {
+                return false;
+            }
+        }
+
+        return $this->permissions->contains('id', $permission->id);
     }
 
     /**
@@ -241,6 +272,16 @@ trait HasPermissions
 
         $this->load('permissions');
 
+        $this->forgetCachedPermissions();
+
         return $this;
+    }
+
+    /**
+     * Forget the cached permissions.
+     */
+    public function forgetCachedPermissions()
+    {
+        app(PermissionLoader::class)->forgetCachedPermissions();
     }
 }

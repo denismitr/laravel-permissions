@@ -50,7 +50,7 @@ class RoleTest extends TestCase
     /** @test */
     public function it_can_be_given_a_permission()
     {
-        $this->userRole->givePermissionTo('edit-articles');
+        $this->userRole->givePermissionTo($this->editArticlesPermission->name);
 
         $this->assertTrue($this->userRole->hasPermissionTo('edit-articles'));
     }
@@ -165,17 +165,7 @@ class RoleTest extends TestCase
     /** @test */
     public function it_returns_false_if_it_does_not_have_a_permission_object()
     {
-        $permission = app(Permission::class)->findByName('other-permission');
-
-        $this->assertFalse($this->userRole->hasPermissionTo($permission));
-    }
-
-    /** @test */
-    public function it_returns_false_when_a_permission_of_the_wrong_guard_is_passed_in()
-    {
-        $permission = app(Permission::class)->findByName('wrong-guard-permission', 'admin');
-
-        $this->assertFalse($this->userRole->hasPermissionTo($permission));
+        $this->assertFalse($this->userRole->hasPermissionTo(null));
     }
 
     /** @test */

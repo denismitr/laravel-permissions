@@ -12,9 +12,10 @@ class LTPServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application services.
      *
+     * @param PermissionLoader $permissionLoader
      * @return void
      */
-    public function boot()
+    public function boot(PermissionLoader $permissionLoader)
     {
         if ( ! is_lumen()) {
             $this->publishes([
@@ -34,6 +35,7 @@ class LTPServiceProvider extends ServiceProvider
 		} catch(\Throwable $t) {}
 
 
+        $permissionLoader->registerPermissions();
     }
 
     /**

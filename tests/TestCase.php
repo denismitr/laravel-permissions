@@ -7,6 +7,7 @@ namespace Denismitr\LTP\Test;
 use Denismitr\LTP\Models\Permission;
 use Denismitr\LTP\Models\Role;
 use Denismitr\LTP\LTPServiceProvider;
+use Denismitr\LTP\PermissionLoader;
 use Denismitr\LTP\Test\Models\Admin;
 use Denismitr\LTP\Test\Models\User;
 use Illuminate\Database\Schema\Blueprint;
@@ -66,6 +67,8 @@ abstract class TestCase extends OrchestraTestCase
         parent::setUp();
 
         $this->setUpDatabase($this->app);
+
+        $this->reloadPermissions();
     }
 
     protected function getPackageProviders($app)
@@ -127,6 +130,14 @@ abstract class TestCase extends OrchestraTestCase
         $this->editNewsPermission = $app[Permission::class]->create(['name' => 'edit-news']);
         $this->editBlogPermission = $app[Permission::class]->create(['name' => 'edit-blog']);
         $this->adminPermission = $app[Permission::class]->create(['name' => 'admin-actions', 'guard' => 'admin']);
+    }
+
+    /**
+     * Reload the permissions.
+     */
+    protected function reloadPermissions()
+    {
+        app(PermissionLoader::class)->forgetCachedPermissions();
     }
 
     /**

@@ -61,7 +61,7 @@ class GateTest extends TestCase
 
         $this->assertTrue($this->admin->hasPermissionTo($this->adminPermission));
 
-        $this->assertTrue($this->admin->can('admin-permission'));
+        $this->assertTrue($this->admin->can($this->adminPermission->name));
         $this->assertFalse($this->admin->can('non-existing-permission'));
         $this->assertFalse($this->admin->can('edit-articles'));
     }

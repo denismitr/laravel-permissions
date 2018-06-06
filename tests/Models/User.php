@@ -4,6 +4,7 @@
 namespace Denismitr\LTP\Test\Models;
 
 
+use Denismitr\LTP\Traits\CacheablePermissions;
 use Denismitr\LTP\Traits\HasPermissions;
 use Denismitr\LTP\Traits\HasRoles;
 use Illuminate\Auth\Authenticatable;
@@ -14,7 +15,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 
 class User extends Model implements AuthorizableContract, AuthenticatableContract
 {
-    use Authorizable, Authenticatable, HasRoles, HasPermissions;
+    use Authorizable, Authenticatable, HasRoles, CacheablePermissions;
 
     /**
      * The attributes that are mass assignable.

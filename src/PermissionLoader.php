@@ -4,7 +4,9 @@
 namespace Denismitr\LTP;
 
 
+use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
 use Denismitr\LTP\Models\Permission;
+use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Collection;
@@ -33,14 +35,31 @@ class PermissionLoader
         $this->cache = $cache;
     }
 
+    public function registerPermissions(): bool
+    {
+        $this->gate->before(function (Authorizable $user, string $ability) {
+            try {
+                if (method_exists($user, 'hasPermissionTo')) {
+                    return $user->hasPermissionTo($ability) ?: null;
+                }
+            } catch (PermissionDoesNotExist $e) {}
+        });
+
+        return true;
+    }
+
+    public function forgetCachedPermissions()
+    {
+        $this->cache->forget($this->cacheKey);
+    }
+
     /**
      * @return Collection
      */
     public function getPermissions(): Collection
     {
-        return app(Permission::class)->with('roles')->get();
-//        return $this->cache->remember($this->cacheKey, config('permissions.cache_expiration_time'), function () {
-//            return app(Permission::class)->with('role')->get();
-//        });
+        return $this->cache->remember($this->cacheKey, config('permissions.cache_expiration_time'), function () {
+            return app(Permission::class)->with('roles')->get();
+        });
     }
 }

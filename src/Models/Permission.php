@@ -38,14 +38,15 @@ class Permission extends Model implements UserPermission, HasGuard
         $attributes['guard'] = $attributes['guard'] ?? Guard::getDefault(static::class);
 
         static::getPermissions()->each(function ($permission) use ($attributes) {
-            if ($permission->name === $attributes['name'] &&
-                $permission->guard === $attributes['guard']) {
+            if ($permission->name === $attributes['name'] && $permission->guard === $attributes['guard']) {
                 throw PermissionAlreadyExists::create(
                     $attributes['name'],
                     $attributes['guard']
                 );
             }
         })->first();
+
+        app(PermissionLoader::class)->forgetCachedPermissions();
 
         return static::query()->create($attributes);
     }

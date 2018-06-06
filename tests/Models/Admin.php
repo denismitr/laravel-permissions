@@ -14,7 +14,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 
 class Admin extends Model implements AuthorizableContract, AuthenticatableContract
 {
-    use Authorizable, Authenticatable, HasRoles, HasPermissions;
+    use Authorizable, Authenticatable, HasRoles;
 
     /**
      * The attributes that are mass assignable.

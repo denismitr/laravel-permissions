@@ -59,7 +59,10 @@ class HasPermissionsTest extends TestCase
     /** @test */
     public function it_can_scope_users_using_a_string()
     {
+        /** @var User $user1 */
         $user1 = User::create(['email' => 'user1@test.com']);
+
+        /** @var User $user1 */
         $user2 = User::create(['email' => 'user2@test.com']);
 
         $user1->givePermissionTo(['edit-articles', 'edit-news']);
@@ -68,9 +71,6 @@ class HasPermissionsTest extends TestCase
 
         $user2->assignRole($this->userRole);
 
-        dd(User::whereHas('permissions', function ($q) {
-            $q->where('name', 'edit-articles');
-        })->count());
         $scopedUsers1 = User::permission('edit-articles')->get();
         $scopedUsers2 = User::permission(['edit-news'])->get();
 
