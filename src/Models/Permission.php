@@ -49,6 +49,58 @@ class Permission extends Model implements UserPermission, HasGuard
 
         return static::query()->create($attributes);
     }
+
+    /**
+     * @param int $id
+     * @return UserPermission
+     * @throws PermissionDoesNotExist
+     */
+    public static function findById(int $id): UserPermission
+    {
+        $permission = static::getPermissions()->where('id', $id)->first();
+
+        if ( ! $permission) {
+            throw PermissionDoesNotExist::createWithId($id);
+        }
+
+        return $permission;
+    }
+
+
+    /**
+     * @param string $name
+     * @param null $guard
+     * @return UserPermission
+     * @throws PermissionDoesNotExist
+     * @throws \ReflectionException
+     */
+    public static function findByName(string $name, $guard = null): UserPermission
+    {
+        [$permission, $guard] = static::find($name, $guard);
+
+        if ( ! $permission) {
+            throw PermissionDoesNotExist::create($name, $guard);
+        }
+
+        return $permission;
+    }
+
+    /**
+     * @param string $name
+     * @param null $guard
+     * @return UserPermission
+     * @throws \ReflectionException
+     */
+    public static function findOrCreate(string $name, $guard = null): UserPermission
+    {
+        [$permission, $guard] = static::find($name, $guard);
+
+        if ( ! $permission) {
+            return static::create(['name' => $name, 'guard' => $guard]);
+        }
+
+        return $permission;
+    }
     
     /*
     |--------------------------------------------------------------------------
@@ -81,44 +133,11 @@ class Permission extends Model implements UserPermission, HasGuard
     }
 
 
-    /**
-     * @param int $id
-     * @return UserPermission
-     * @throws PermissionDoesNotExist
-     */
-    public static function findById(int $id): UserPermission
-    {
-        $permission = static::getPermissions()->where('id', $id)->first();
-
-        if ( ! $permission) {
-            throw PermissionDoesNotExist::createWithId($id);
-        }
-
-        return $permission;
-    }
-
-
-    /**
-     * @param string $name
-     * @param null $guard
-     * @return UserPermission
-     * @throws PermissionDoesNotExist
-     * @throws \ReflectionException
-     */
-    public static function findByName(string $name, $guard = null): UserPermission
-    {
-        $guard = $guard ?? Guard::getDefault(static::class);
-
-        $permission = static::getPermissions()->filter(function ($permission) use ($name, $guard) {
-            return $permission->name === $name && $permission->guard === $guard;
-        })->first();
-
-        if ( ! $permission) {
-            throw PermissionDoesNotExist::create($name, $guard);
-        }
-
-        return $permission;
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | Getters
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * @return Collection
@@ -126,5 +145,22 @@ class Permission extends Model implements UserPermission, HasGuard
     public static function getPermissions(): Collection
     {
         return app(PermissionLoader::class)->getPermissions();
+    }
+
+    /**
+     * @param string $name
+     * @param null $guard
+     * @return array
+     * @throws \ReflectionException
+     */
+    protected static function find(string $name, $guard = null): array
+    {
+        $guard = $guard ?? Guard::getDefault(static::class);
+
+        $permission = static::getPermissions()->filter(function ($permission) use ($name, $guard) {
+            return $permission->name === $name && $permission->guard === $guard;
+        })->first();
+
+        return [$permission, $guard];
     }
 }

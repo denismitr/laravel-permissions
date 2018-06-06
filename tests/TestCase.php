@@ -28,17 +28,17 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * @var Role
      */
-    protected $roleUser;
+    protected $userRole;
 
     /**
      * @var Role
      */
-    protected $rolePremium;
+    protected $premiumRole;
 
     /**
      * @var Role
      */
-    protected $roleAdmin;
+    protected $adminRole;
 
     /**
      * @var Permission
@@ -119,9 +119,9 @@ abstract class TestCase extends OrchestraTestCase
         $this->user = User::create(['email' => 'test@user.com']);
         $this->admin = Admin::create(['email' => 'admin@user.com']);
 
-        $this->roleUser = $app[Role::class]->create(['name' => 'ROLE_USER']);
-        $this->rolePremium = $app[Role::class]->create(['name' => 'ROLE_PREMIUM']);
-        $this->roleAdmin = $app[Role::class]->create(['name' => 'ROLE_ADMIN', 'guard' => 'admin']);
+        $this->userRole = $app[Role::class]->create(['name' => 'ROLE_USER']);
+        $this->premiumRole = $app[Role::class]->create(['name' => 'ROLE_PREMIUM']);
+        $this->adminRole = $app[Role::class]->create(['name' => 'ROLE_ADMIN', 'guard' => 'admin']);
 
         $this->editArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles']);
         $this->editNewsPermission = $app[Permission::class]->create(['name' => 'edit-news']);
@@ -143,5 +143,13 @@ abstract class TestCase extends OrchestraTestCase
     public function refreshAdmin()
     {
         $this->admin = $this->admin->fresh();
+    }
+
+    /**
+     * Refresh the testAdmin.
+     */
+    public function refreshUserRole()
+    {
+        $this->userRole = $this->userRole->fresh();
     }
 }

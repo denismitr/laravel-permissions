@@ -4,6 +4,7 @@ namespace Denismitr\LTP\Models;
 
 use App\User;
 use Denismitr\LTP\Contracts\HasGuard;
+use Denismitr\LTP\Contracts\UserRole;
 use Denismitr\LTP\Exceptions\GuardMismatch;
 use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
 use Denismitr\LTP\Exceptions\RoleAlreadyExists;
@@ -12,7 +13,7 @@ use Denismitr\LTP\Guard;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-class Role extends Model implements HasGuard
+class Role extends Model implements HasGuard, UserRole
 {
     protected $guarded = [];
 
@@ -54,7 +55,7 @@ class Role extends Model implements HasGuard
      */
     public static function findByName(string $name, string $guard = null): self
     {
-        $guard = $guard ?: Guard::getDefault($guard);
+        $guard = $guard ?: Guard::getDefault(static::class);
 
         $role = static::query()->whereName($name)->whereGuard($guard)->first();
 
@@ -77,6 +78,26 @@ class Role extends Model implements HasGuard
 
         if ( ! $role ) {
             throw RoleDoesNotExist::createWithId($id);
+        }
+
+        return $role;
+    }
+
+    /**
+     * @param string $name
+     * @param null $guard
+     * @return UserRole
+     * @throws RoleAlreadyExists
+     * @throws \ReflectionException
+     */
+    public static function findOrCreate(string $name, $guard = null): UserRole
+    {
+        $guard = $guard ?? Guard::getDefault(static::class);
+
+        $role = static::query()->whereName('name', $name)->whereGuard($guard)->first();
+
+        if ( ! $role) {
+            return static::create(['name' => $name, 'guard' => $guard]);
         }
 
         return $role;
