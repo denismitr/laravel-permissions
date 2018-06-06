@@ -4,6 +4,8 @@
 namespace Denismitr\LTP;
 
 
+use Denismitr\LTP\Contracts\HasGuard;
+use Denismitr\LTP\Exceptions\GuardMismatch;
 use Illuminate\Support\Collection;
 
 class Guard
@@ -63,5 +65,18 @@ class Guard
         $default = config('auth.defaults.guard');
 
         return static::getNames($class)->first() ?: $default;
+    }
+
+    /**
+     * @param HasGuard $roleOrPermission
+     * @param $model
+     * @throws GuardMismatch
+     * @throws \ReflectionException
+     */
+    public static function verifyIsSharedBetween(HasGuard $roleOrPermission, $model)
+    {
+        if ( ! static::getNames($model)->contains($roleOrPermission->getGuard()) ) {
+            throw GuardMismatch::create($roleOrPermission->getGuard(), static::getNames($model));
+        }
     }
 }

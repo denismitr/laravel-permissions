@@ -4,8 +4,6 @@
 namespace Denismitr\LTP\Traits;
 
 
-use Denismitr\LTP\Contracts\HasGuard;
-use Denismitr\LTP\Exceptions\GuardMismatch;
 use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
 use Denismitr\LTP\Guard;
 use Denismitr\LTP\Models\Permission;
@@ -39,7 +37,7 @@ trait HasPermissions
                 return $this->getPermission($permission);
             })
             ->each(function($permission) {
-                $this->verifySharedGuard($permission);
+                Guard::verifyIsSharedBetween($permission, $this);
             })
             ->all();
 
@@ -106,15 +104,33 @@ trait HasPermissions
         throw new PermissionDoesNotExist("Permissions list is invalid");
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Actions
+    |--------------------------------------------------------------------------
+    */
+
     /**
-     * @param HasGuard $roleOrPermission
-     * @throws GuardMismatch
+     * @param array ...$permissions
+     * @return $this
+     */
+    public function syncPermissions(...$permissions)
+    {
+        $this->permissions()->detach();
+
+        return $this->givePermissionTo($permissions);
+    }
+
+    /**
+     * @param array ...$permissions
+     * @return $this
+     * @throws PermissionDoesNotExist
      * @throws \ReflectionException
      */
-    protected function verifySharedGuard(HasGuard $roleOrPermission)
+    public function revokePermissionTo(...$permissions)
     {
-        if ( ! Guard::getNames($this)->contains($roleOrPermission->getGuard()) ) {
-            throw GuardMismatch::create($roleOrPermission->getGuard(), Guard::getNames($this));
-        }
+        $this->permissions()->detach($this->getPermissions($permissions));
+
+        return $this;
     }
 }
