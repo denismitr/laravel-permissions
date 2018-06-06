@@ -6,12 +6,8 @@ namespace Denismitr\LTP\Exceptions;
 
 class PermissionAlreadyExists extends \Exception
 {
-    public static function create(string $name, string $guard, int $teamId = null): self
+    public static function create(string $name, string $guard): self
     {
-        if ( ! $teamId) {
-            return new static("A `{$name}` permission already exists for guard `{$guard}`.");
-        }
-
-        return new static("A `{$name}` permission already exists for guard `{$guard}` and team ID `$teamId`.");
+        return new static("A `{$name}` permission already exists for guard `{$guard}`.");
     }
 }

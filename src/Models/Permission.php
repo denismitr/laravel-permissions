@@ -36,16 +36,13 @@ class Permission extends Model implements UserPermission, HasGuard
     public static function create(array $attributes = [])
     {
         $attributes['guard'] = $attributes['guard'] ?? Guard::getDefault(static::class);
-        $attributes['team_id'] = $attributes['team_id'] ?? null;
 
         static::getPermissions()->each(function ($permission) use ($attributes) {
             if ($permission->name === $attributes['name'] &&
-                $permission->guard === $attributes['guard'] &&
-                $permission->team_id === $attributes['team_id']) {
+                $permission->guard === $attributes['guard']) {
                 throw PermissionAlreadyExists::create(
                     $attributes['name'],
-                    $attributes['guard'],
-                    $attributes['team_id']
+                    $attributes['guard']
                 );
             }
         })->first();

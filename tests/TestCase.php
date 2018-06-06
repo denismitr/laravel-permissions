@@ -132,7 +132,7 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * Refresh the testUser.
      */
-    public function refreshTestUser()
+    public function refreshUser()
     {
         $this->user = $this->user->fresh();
     }
@@ -140,7 +140,7 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * Refresh the testAdmin.
      */
-    public function refreshTestAdmin()
+    public function refreshAdmin()
     {
         $this->admin = $this->admin->fresh();
     }

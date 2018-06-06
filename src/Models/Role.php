@@ -37,7 +37,6 @@ class Role extends Model implements HasGuard
     public static function create(array $attributes = [])
     {
         $attributes['guard'] = $attributes['guard'] ?? Guard::getDefault(static::class);
-        $attributes['team_id'] = $attributes['team_id'] ?? null;
 
         if (static::whereName($attributes['name'])->whereGuard($attributes['guard'])->first()) {
             throw RoleAlreadyExists::create($attributes['name'], $attributes['guard']);

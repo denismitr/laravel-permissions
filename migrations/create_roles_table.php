@@ -17,7 +17,6 @@ class CreateRolesTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('guard');
-            $table->unsignedInteger('team_id')->nullable();
             $table->timestamps();
         });
     }

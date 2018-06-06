@@ -14,15 +14,17 @@ class CreateUserPermissionsTable extends Migration
     public function up()
     {
         Schema::create('user_permissions', function (Blueprint $table) {
+            $table->increments('id');
             $table->unsignedInteger('permission_id');
             $table->morphs('user');
+            $table->unsignedInteger('team_id')->nullable();
 
             $table->foreign('permission_id')
                 ->references('id')
                 ->on('permissions')
                 ->onDelete('cascade');
 
-            $table->primary(['user_id', 'user_type', 'permission_id']);
+            $table->unique(['user_id', 'user_type', 'permission_id', 'team_id']);
         });
     }
 
