@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Denismitr\LTP\Contracts;
+namespace Denismitr\Permissions\Contracts;
 
 
 interface UserPermission

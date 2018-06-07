@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Denismitr\LTP;
+namespace Denismitr\Permissions;
 
 
-use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
-use Denismitr\LTP\Models\Permission;
+use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
+use Denismitr\Permissions\Models\Permission;
 use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Cache\Repository;

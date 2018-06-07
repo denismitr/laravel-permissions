@@ -1,13 +1,13 @@
 <?php
 
 
-namespace Denismitr\LTP\Test;
+namespace Denismitr\Permissions\Test;
 
 
-use Denismitr\LTP\Exceptions\PermissionAlreadyExists;
-use Denismitr\LTP\Models\Permission;
-use Denismitr\LTP\Test\Models\Admin;
-use Denismitr\LTP\Test\Models\User;
+use Denismitr\Permissions\Exceptions\PermissionAlreadyExists;
+use Denismitr\Permissions\Models\Permission;
+use Denismitr\Permissions\Test\Models\Admin;
+use Denismitr\Permissions\Test\Models\User;
 
 class PermissionTest extends TestCase
 {

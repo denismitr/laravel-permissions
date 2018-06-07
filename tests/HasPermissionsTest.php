@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Denismitr\LTP\Test;
+namespace Denismitr\Permissions\Test;
 
 
-use Denismitr\LTP\Exceptions\GuardMismatch;
-use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
-use Denismitr\LTP\Test\Models\User;
+use Denismitr\Permissions\Exceptions\GuardMismatch;
+use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
+use Denismitr\Permissions\Test\Models\User;
 
 class HasPermissionsTest extends TestCase
 {

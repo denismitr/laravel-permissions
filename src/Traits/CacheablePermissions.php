@@ -1,10 +1,10 @@
 <?php
 
 
-namespace Denismitr\LTP\Traits;
+namespace Denismitr\Permissions\Traits;
 
 
-use Denismitr\LTP\PermissionLoader;
+use Denismitr\Permissions\PermissionLoader;
 
 trait CacheablePermissions
 {

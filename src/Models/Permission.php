@@ -1,13 +1,13 @@
 <?php
 
-namespace Denismitr\LTP\Models;
+namespace Denismitr\Permissions\Models;
 
-use Denismitr\LTP\Contracts\HasGuard;
-use Denismitr\LTP\Contracts\UserPermission;
-use Denismitr\LTP\Exceptions\PermissionAlreadyExists;
-use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
-use Denismitr\LTP\Guard;
-use Denismitr\LTP\PermissionLoader;
+use Denismitr\Permissions\Contracts\HasGuard;
+use Denismitr\Permissions\Contracts\UserPermission;
+use Denismitr\Permissions\Exceptions\PermissionAlreadyExists;
+use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
+use Denismitr\Permissions\Guard;
+use Denismitr\Permissions\PermissionLoader;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;

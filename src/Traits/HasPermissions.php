@@ -1,13 +1,13 @@
 <?php
 
 
-namespace Denismitr\LTP\Traits;
+namespace Denismitr\Permissions\Traits;
 
 
-use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
-use Denismitr\LTP\Guard;
-use Denismitr\LTP\Models\Permission;
-use Denismitr\LTP\PermissionLoader;
+use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
+use Denismitr\Permissions\Guard;
+use Denismitr\Permissions\Models\Permission;
+use Denismitr\Permissions\PermissionLoader;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;

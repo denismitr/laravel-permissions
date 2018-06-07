@@ -2,8 +2,8 @@
 
 return [
     'models' => [
-        'permission' => \Denismitr\LTP\Models\Permission::class,
-        'role' => \Denismitr\LTP\Models\Role::class,
+        'permission' => \Denismitr\Permissions\Models\Permission::class,
+        'role' => \Denismitr\Permissions\Models\Role::class,
     ],
 
     'table_names' => [

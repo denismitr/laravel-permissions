@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Denismitr\LTP\Exceptions;
+namespace Denismitr\Permissions\Exceptions;
 
 
 class PermissionDoesNotExist extends \Exception

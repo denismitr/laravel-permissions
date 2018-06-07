@@ -1,15 +1,15 @@
 <?php
 
-namespace Denismitr\LTP\Models;
+namespace Denismitr\Permissions\Models;
 
-use Denismitr\LTP\Contracts\HasGuard;
-use Denismitr\LTP\Contracts\UserRole;
-use Denismitr\LTP\Exceptions\GuardMismatch;
-use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
-use Denismitr\LTP\Exceptions\RoleAlreadyExists;
-use Denismitr\LTP\Exceptions\RoleDoesNotExist;
-use Denismitr\LTP\Guard;
-use Denismitr\LTP\Traits\HasPermissions;
+use Denismitr\Permissions\Contracts\HasGuard;
+use Denismitr\Permissions\Contracts\UserRole;
+use Denismitr\Permissions\Exceptions\GuardMismatch;
+use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
+use Denismitr\Permissions\Exceptions\RoleAlreadyExists;
+use Denismitr\Permissions\Exceptions\RoleDoesNotExist;
+use Denismitr\Permissions\Guard;
+use Denismitr\Permissions\Traits\HasPermissions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;

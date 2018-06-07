@@ -1,11 +1,11 @@
 <?php
 
 
-namespace Denismitr\LTP;
+namespace Denismitr\Permissions;
 
 
-use Denismitr\LTP\Contracts\HasGuard;
-use Denismitr\LTP\Exceptions\GuardMismatch;
+use Denismitr\Permissions\Contracts\HasGuard;
+use Denismitr\Permissions\Exceptions\GuardMismatch;
 use Illuminate\Support\Collection;
 
 class Guard

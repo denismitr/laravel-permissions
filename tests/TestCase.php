@@ -1,15 +1,15 @@
 <?php
 
 
-namespace Denismitr\LTP\Test;
+namespace Denismitr\Permissions\Test;
 
 
-use Denismitr\LTP\Models\Permission;
-use Denismitr\LTP\Models\Role;
-use Denismitr\LTP\LTPServiceProvider;
-use Denismitr\LTP\PermissionLoader;
-use Denismitr\LTP\Test\Models\Admin;
-use Denismitr\LTP\Test\Models\User;
+use Denismitr\Permissions\Models\Permission;
+use Denismitr\Permissions\Models\Role;
+use Denismitr\Permissions\PermissionsServiceProvider;
+use Denismitr\Permissions\PermissionLoader;
+use Denismitr\Permissions\Test\Models\Admin;
+use Denismitr\Permissions\Test\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
@@ -74,7 +74,7 @@ abstract class TestCase extends OrchestraTestCase
     protected function getPackageProviders($app)
     {
         return [
-            LTPServiceProvider::class
+            PermissionsServiceProvider::class
         ];
     }
 

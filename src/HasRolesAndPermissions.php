@@ -2,9 +2,8 @@
 
 namespace Denismitr\LTP;
 
-use App\User;
-use Denismitr\LTP\Models\Permission;
-use Denismitr\LTP\Models\Role;
+use Denismitr\Permissions\Models\Permission;
+use Denismitr\Permissions\Models\Role;
 
 trait HasRolesAndPermissions
 {

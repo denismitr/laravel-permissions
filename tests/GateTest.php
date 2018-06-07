@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Denismitr\LTP\Test;
+namespace Denismitr\Permissions\Test;
 
 
 use Illuminate\Contracts\Auth\Access\Gate;

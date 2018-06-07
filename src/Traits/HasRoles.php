@@ -1,14 +1,14 @@
 <?php
 
 
-namespace Denismitr\LTP\Traits;
+namespace Denismitr\Permissions\Traits;
 
 
-use Denismitr\LTP\Contracts\UserRole;
-use Denismitr\LTP\Guard;
-use Denismitr\LTP\HasRolesAndPermissions;
-use Denismitr\LTP\Models\Role;
-use Denismitr\LTP\PermissionLoader;
+use Denismitr\Permissions\Contracts\UserRole;
+use Denismitr\Permissions\Guard;
+use Denismitr\Permissions\HasRolesAndPermissions;
+use Denismitr\Permissions\Models\Role;
+use Denismitr\Permissions\PermissionLoader;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 

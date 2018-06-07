@@ -1,17 +1,17 @@
 <?php
 
 
-namespace Denismitr\LTP\Test;
+namespace Denismitr\Permissions\Test;
 
 
-use Denismitr\LTP\Exceptions\GuardMismatch;
-use Denismitr\LTP\Exceptions\PermissionDoesNotExist;
-use Denismitr\LTP\Exceptions\RoleAlreadyExists;
-use Denismitr\LTP\Exceptions\RoleDoesNotExist;
-use Denismitr\LTP\Models\Permission;
-use Denismitr\LTP\Models\Role;
-use Denismitr\LTP\Test\Models\Admin;
-use Denismitr\LTP\Test\Models\User;
+use Denismitr\Permissions\Exceptions\GuardMismatch;
+use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
+use Denismitr\Permissions\Exceptions\RoleAlreadyExists;
+use Denismitr\Permissions\Exceptions\RoleDoesNotExist;
+use Denismitr\Permissions\Models\Permission;
+use Denismitr\Permissions\Models\Role;
+use Denismitr\Permissions\Test\Models\Admin;
+use Denismitr\Permissions\Test\Models\User;
 
 class RoleTest extends TestCase
 {
