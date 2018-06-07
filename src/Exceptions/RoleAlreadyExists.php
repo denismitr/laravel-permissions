@@ -6,8 +6,8 @@ namespace Denismitr\Permissions\Exceptions;
 
 class RoleAlreadyExists extends \Exception
 {
-    public static function create(string $name, string $guard): self
+    public static function create(string $name): self
     {
-        return new static("A `{$name}` role already exists for guard `{$guard}`");
+        return new static("A `{$name}` role already exists.");
     }
 }

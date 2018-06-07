@@ -20,22 +20,6 @@ class RoleTest extends TestCase
         parent::setUp();
 
         Permission::create(['name' => 'other-permission']);
-        Permission::create(['name' => 'wrong-guard-permission', 'guard' => 'admin']);
-    }
-
-    /** @test */
-    public function it_has_user_models_of_the_right_class()
-    {
-        $this->admin->assignRole($this->adminRole);
-        $this->user->assignRole($this->userRole);
-
-        $this->assertCount(1, $this->adminRole->users);
-        $this->assertCount(1, $this->userRole->users);
-
-        $this->assertTrue($this->userRole->users->first()->is($this->user));
-        $this->assertTrue($this->adminRole->users->first()->is($this->admin));
-        $this->assertInstanceOf(User::class, $this->userRole->users->first());
-        $this->assertInstanceOf(Admin::class, $this->adminRole->users->first());
     }
 
     /** @test */
@@ -54,18 +38,7 @@ class RoleTest extends TestCase
 
         $this->assertTrue($this->userRole->hasPermissionTo('edit-articles'));
     }
-    
-    /** @test */
-    public function it_throws_an_exception_when_given_a_permission_that_belongs_to_another_guard()
-    {
-        $this->expectException(PermissionDoesNotExist::class);
 
-        $this->userRole->givePermissionTo('admin-actions');
-
-        $this->expectException(GuardMismatch::class);
-
-        $this->userRole->givePermissionTo($this->adminPermission);
-    }
 
     /** @test */
     public function role_can_receive_multiple_permissions_as_array()
@@ -103,20 +76,6 @@ class RoleTest extends TestCase
         $this->expectException(PermissionDoesNotExist::class);
 
         $this->userRole->syncPermissions('permission-does-not-exist');
-    }
-
-    /** @test */
-    public function it_throws_an_exception_when_syncing_permissions_that_belong_to_a_different_guard()
-    {
-        $this->userRole->givePermissionTo('edit-articles');
-
-        $this->expectException(PermissionDoesNotExist::class);
-
-        $this->userRole->syncPermissions('admin-actions');
-
-        $this->expectException(GuardMismatch::class);
-
-        $this->userRole->syncPermissions($this->adminPermission);
     }
 
     /** @test */

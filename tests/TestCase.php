@@ -93,6 +93,7 @@ abstract class TestCase extends OrchestraTestCase
 
         // Use test User model for users provider
         $app['config']->set('auth.providers.users.model', User::class);
+        $app['config']->set('permissions.models.user', User::class);
     }
 
     protected function setUpDatabase(Application $app)
@@ -124,12 +125,12 @@ abstract class TestCase extends OrchestraTestCase
 
         $this->userRole = $app[Role::class]->create(['name' => 'ROLE_USER']);
         $this->premiumRole = $app[Role::class]->create(['name' => 'ROLE_PREMIUM']);
-        $this->adminRole = $app[Role::class]->create(['name' => 'ROLE_ADMIN', 'guard' => 'admin']);
+        $this->adminRole = $app[Role::class]->create(['name' => 'ROLE_ADMIN']);
 
         $this->editArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles']);
         $this->editNewsPermission = $app[Permission::class]->create(['name' => 'edit-news']);
         $this->editBlogPermission = $app[Permission::class]->create(['name' => 'edit-blog']);
-        $this->adminPermission = $app[Permission::class]->create(['name' => 'admin-actions', 'guard' => 'admin']);
+        $this->adminPermission = $app[Permission::class]->create(['name' => 'admin-actions']);
     }
 
     /**

@@ -8,17 +8,16 @@ class PermissionDoesNotExist extends \Exception
 {
     /**
      * @param string $name
-     * @param string $guard
      * @param int|null $teamId
      * @return PermissionDoesNotExist
      */
-    public static function create(string $name, string $guard, int $teamId = null): self
+    public static function create(string $name, int $teamId = null): self
     {
         if ( ! $teamId) {
-            return new static("A `{$name}` permission does not exist for guard `{$guard}`.");
+            return new static("A `{$name}` permission does not exist.");
         }
 
-        return new static("A `{$name}` permission does not exist for guard `{$guard}` and team ID `$teamId`.");
+        return new static("A `{$name}` permission does not exist and team ID `$teamId`.");
     }
 
     /**

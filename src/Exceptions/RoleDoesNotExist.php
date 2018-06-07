@@ -8,17 +8,11 @@ class RoleDoesNotExist extends \Exception
 {
     /**
      * @param string $name
-     * @param string $guard
-     * @param int|null $teamId
      * @return RoleDoesNotExist
      */
-    public static function create(string $name, string $guard, int $teamId = null): self
+    public static function create(string $name): self
     {
-        if ( ! $teamId) {
-            return new static("A `{$name}` role does not exist for guard `{$guard}`.");
-        }
-
-        return new static("A `{$name}` role does not exist for guard `{$guard}` and team ID `$teamId`.");
+        return new static("A `{$name}` role does not exist.");
     }
 
     /**

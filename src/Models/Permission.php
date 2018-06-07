@@ -2,7 +2,6 @@
 
 namespace Denismitr\Permissions\Models;
 
-use Denismitr\Permissions\Contracts\HasGuard;
 use Denismitr\Permissions\Contracts\UserPermission;
 use Denismitr\Permissions\Exceptions\PermissionAlreadyExists;
 use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
@@ -13,36 +12,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 
-class Permission extends Model implements UserPermission, HasGuard
+class Permission extends Model implements UserPermission
 {
     protected $guarded = ['id'];
 
 
-    public function __construct(array $attributes = [])
-    {
-        $attributes['guard'] = $attributes['guard'] ?? config('auth.defaults.guard');
-
-        parent::__construct($attributes);
-    }
-
     /**
-     * @return string
+     * @param array $attributes
+     * @return $this|Model
      */
-    public function getGuard(): string
+    public static function create(array $attributes = []): self
     {
-        return $this->guard;
-    }
-
-    public static function create(array $attributes = [])
-    {
-        $attributes['guard'] = $attributes['guard'] ?? Guard::getDefault(static::class);
-
         static::getPermissions()->each(function ($permission) use ($attributes) {
-            if ($permission->name === $attributes['name'] && $permission->guard === $attributes['guard']) {
-                throw PermissionAlreadyExists::create(
-                    $attributes['name'],
-                    $attributes['guard']
-                );
+            if ($permission->name === $attributes['name']) {
+                throw PermissionAlreadyExists::create($attributes['name']);
             }
         })->first();
 
@@ -70,17 +53,15 @@ class Permission extends Model implements UserPermission, HasGuard
 
     /**
      * @param string $name
-     * @param null $guard
      * @return UserPermission
      * @throws PermissionDoesNotExist
-     * @throws \ReflectionException
      */
-    public static function findByName(string $name, $guard = null): UserPermission
+    public static function findByName(string $name): UserPermission
     {
-        [$permission, $guard] = static::find($name, $guard);
+        $permission = static::find($name);
 
         if ( ! $permission) {
-            throw PermissionDoesNotExist::create($name, $guard);
+            throw PermissionDoesNotExist::create($name);
         }
 
         return $permission;
@@ -88,16 +69,14 @@ class Permission extends Model implements UserPermission, HasGuard
 
     /**
      * @param string $name
-     * @param null $guard
      * @return UserPermission
-     * @throws \ReflectionException
      */
-    public static function findOrCreate(string $name, $guard = null): UserPermission
+    public static function findOrCreate(string $name): UserPermission
     {
-        [$permission, $guard] = static::find($name, $guard);
+        $permission = static::find($name);
 
         if ( ! $permission) {
-            return static::create(['name' => $name, 'guard' => $guard]);
+            return static::create(['name' => $name]);
         }
 
         return $permission;
@@ -125,7 +104,7 @@ class Permission extends Model implements UserPermission, HasGuard
     public function users(): MorphToMany
     {
         return $this->morphedByMany(
-            Guard::getModelFor($this->attributes['guard']),
+            config('permissions.models.user'),
             'user',
             'user_permissions',
                 'permission_id',
@@ -150,18 +129,14 @@ class Permission extends Model implements UserPermission, HasGuard
 
     /**
      * @param string $name
-     * @param null $guard
-     * @return array
-     * @throws \ReflectionException
+     * @return Permission|null
      */
-    protected static function find(string $name, $guard = null): array
+    protected static function find(string $name): ?Permission
     {
-        $guard = $guard ?? Guard::getDefault(static::class);
-
-        $permission = static::getPermissions()->filter(function ($permission) use ($name, $guard) {
-            return $permission->name === $name && $permission->guard === $guard;
+        $permission = static::getPermissions()->filter(function ($permission) use ($name) {
+            return $permission->name === $name;
         })->first();
 
-        return [$permission, $guard];
+        return $permission;
     }
 }

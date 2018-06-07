@@ -2,48 +2,30 @@
 
 namespace Denismitr\Permissions\Models;
 
-use Denismitr\Permissions\Contracts\HasGuard;
+
 use Denismitr\Permissions\Contracts\UserRole;
-use Denismitr\Permissions\Exceptions\GuardMismatch;
-use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
 use Denismitr\Permissions\Exceptions\RoleAlreadyExists;
 use Denismitr\Permissions\Exceptions\RoleDoesNotExist;
-use Denismitr\Permissions\Guard;
 use Denismitr\Permissions\Traits\HasPermissions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-class Role extends Model implements HasGuard, UserRole
+class Role extends Model implements UserRole
 {
     use HasPermissions;
 
     protected $guarded = ['id'];
 
     /**
-     * Role constructor.
-     * @param array $attributes
-     * @throws \ReflectionException
-     */
-    public function __construct(array $attributes = [])
-    {
-        $attributes['guard'] = $attributes['guard'] ?? Guard::getDefault(static::class);
-
-        parent::__construct($attributes);
-    }
-
-    /**
      * @param array $attributes
      * @return $this|Model
      * @throws RoleAlreadyExists
-     * @throws \ReflectionException
      */
     public static function create(array $attributes = [])
     {
-        $attributes['guard'] = $attributes['guard'] ?? Guard::getDefault(static::class);
-
-        if (static::whereName($attributes['name'])->whereGuard($attributes['guard'])->first()) {
-            throw RoleAlreadyExists::create($attributes['name'], $attributes['guard']);
+        if (static::whereName($attributes['name'])->first()) {
+            throw RoleAlreadyExists::create($attributes['name']);
         }
 
         return static::query()->create($attributes);
@@ -51,19 +33,15 @@ class Role extends Model implements HasGuard, UserRole
 
     /**
      * @param string $name
-     * @param string|null $guard
      * @return Role
      * @throws RoleDoesNotExist
-     * @throws \ReflectionException
      */
-    public static function findByName(string $name, string $guard = null): self
+    public static function findByName(string $name): self
     {
-        $guard = $guard ?: Guard::getDefault(static::class);
-
-        $role = static::query()->whereName($name)->whereGuard($guard)->first();
+        $role = static::query()->whereName($name)->first();
 
         if ( ! $role ) {
-            throw RoleDoesNotExist::create($name, $guard);
+            throw RoleDoesNotExist::create($name);
         }
 
         return $role;
@@ -91,16 +69,13 @@ class Role extends Model implements HasGuard, UserRole
      * @param null $guard
      * @return UserRole
      * @throws RoleAlreadyExists
-     * @throws \ReflectionException
      */
     public static function findOrCreate(string $name, $guard = null): UserRole
     {
-        $guard = $guard ?? Guard::getDefault(static::class);
-
-        $role = static::query()->whereName('name', $name)->whereGuard($guard)->first();
+        $role = static::query()->whereName('name', $name)->first();
 
         if ( ! $role) {
-            return static::create(['name' => $name, 'guard' => $guard]);
+            return static::create(['name' => $name]);
         }
 
         return $role;
@@ -124,20 +99,12 @@ class Role extends Model implements HasGuard, UserRole
     public function users(): MorphToMany
     {
         return $this->morphedByMany(
-            Guard::getModelFor($this->attributes['guard']),
+            config('permissions.models.user'),
             'user',
             'user_roles',
             'role_id',
             'user_id'
         );
-    }
-
-    /**
-     * @return string
-     */
-    public function getGuard(): string
-    {
-        return $this->guard;
     }
 
     /**

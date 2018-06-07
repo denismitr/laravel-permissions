@@ -5,7 +5,6 @@ namespace Denismitr\Permissions\Traits;
 
 
 use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
-use Denismitr\Permissions\Guard;
 use Denismitr\Permissions\Models\Permission;
 use Denismitr\Permissions\PermissionLoader;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,8 +54,8 @@ trait HasPermissions
         $permissions = $this->resolvePermissions($permissions);
 
         $rolesWithPermissions = $permissions->map(function($permission) {
-            return $permission->roles->all();
-        })->flatten()->unique();
+                return $permission->roles->all();
+            })->flatten()->unique();
 
         return $query->where(function ($query) use ($permissions, $rolesWithPermissions) {
             $query->whereHas('permissions', function ($query) use ($permissions) {
@@ -93,15 +92,11 @@ trait HasPermissions
     /**
      * @param $permission
      * @return bool
-     * @throws \ReflectionException
      */
     public function hasPermissionTo($permission): bool
     {
         if (is_string($permission)) {
-            $permission = app(Permission::class)->findByName(
-                $permission,
-                $this->getDefaultGuard()
-            );
+            $permission = app(Permission::class)->findByName($permission);
         }
 
         return $this->hasDirectPermission($permission) || $this->hasPermissionViaRole($permission);
@@ -115,19 +110,18 @@ trait HasPermissions
     /**
      * @param $permission
      * @return bool
-     * @throws \ReflectionException
      */
     public function hasDirectPermission($permission): bool
     {
         if (is_string($permission)) {
-            $permission = app(Permission::class)->findByName($permission, $this->getDefaultGuard());
+            $permission = app(Permission::class)->findByName($permission);
             if (! $permission) {
                 return false;
             }
         }
 
         if (is_int($permission)) {
-            $permission = app(Permission::class)->findById($permission, $this->getDefaultGuard());
+            $permission = app(Permission::class)->findById($permission);
             if (! $permission) {
                 return false;
             }
@@ -140,16 +134,15 @@ trait HasPermissions
      * @param $permission
      * @return Permission
      * @throws PermissionDoesNotExist
-     * @throws \ReflectionException
      */
     protected function getPermission($permission): Permission
     {
         if (is_numeric($permission)) {
-            return app(Permission::class)->findById($permission, $this->getDefaultGuard());
+            return app(Permission::class)->findById($permission);
         }
 
         if (is_string($permission)) {
-            return app(Permission::class)->findByName($permission, $this->getDefaultGuard());
+            return app(Permission::class)->findByName($permission);
         }
 
         if ($permission instanceof Permission) {
@@ -163,7 +156,6 @@ trait HasPermissions
      * @param array $permissions
      * @return mixed
      * @throws PermissionDoesNotExist
-     * @throws \ReflectionException
      */
     public function getPermissions(array $permissions)
     {
@@ -171,7 +163,6 @@ trait HasPermissions
             if (is_string($permissions[0])) {
                 return app(Permission::class)
                     ->whereIn('name', $permissions)
-                    ->whereIn('guard', $this->getGuards())
                     ->get();
             }
 
@@ -181,24 +172,6 @@ trait HasPermissions
         }
 
         throw new PermissionDoesNotExist("Permissions list is invalid");
-    }
-
-    /**
-     * @return \Illuminate\Support\Collection
-     * @throws \ReflectionException
-     */
-    protected function getGuards()
-    {
-        return Guard::getNames($this);
-    }
-
-    /**
-     * @return string
-     * @throws \ReflectionException
-     */
-    protected function getDefaultGuard(): string
-    {
-        return Guard::getDefault($this);
     }
 
     /**
@@ -218,7 +191,7 @@ trait HasPermissions
                 return $permission;
             }
 
-            return Permission::findByName($permission, $this->getDefaultGuard());
+            return Permission::findByName($permission);
         });
     }
 
@@ -243,7 +216,6 @@ trait HasPermissions
      * @param $permission
      * @return $this
      * @throws PermissionDoesNotExist
-     * @throws \ReflectionException
      */
     public function revokePermissionTo($permission)
     {
@@ -262,11 +234,7 @@ trait HasPermissions
             ->flatten()
             ->map(function ($permission) {
                 return $this->getPermission($permission);
-            })
-            ->each(function($permission) {
-                Guard::verifyIsSharedBetween($permission, $this);
-            })
-            ->all();
+            })->all();
 
         $this->permissions()->saveMany($permissions);
 

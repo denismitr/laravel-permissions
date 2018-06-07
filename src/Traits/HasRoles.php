@@ -4,11 +4,8 @@
 namespace Denismitr\Permissions\Traits;
 
 
-use Denismitr\Permissions\Contracts\UserRole;
-use Denismitr\Permissions\Guard;
 use Denismitr\Permissions\HasRolesAndPermissions;
 use Denismitr\Permissions\Models\Role;
-use Denismitr\Permissions\PermissionLoader;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 
@@ -34,9 +31,6 @@ trait HasRoles
             ->flatten()
             ->map(function ($role) {
                 return $this->getRole($role);
-            })
-            ->each(function ($role) {
-                Guard::verifyIsSharedBetween($role, $this);
             });
 
         $this->roles()->saveMany($roles->all());
@@ -69,7 +63,7 @@ trait HasRoles
                 return $role;
             }
 
-            return app(Role::class)->findByName($role, $this->getDefaultGuard());
+            return app(Role::class)->findByName($role);
         }, $roles);
 
         return $query->whereHas('roles', function ($query) use ($roles) {

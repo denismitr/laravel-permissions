@@ -6,8 +6,8 @@ namespace Denismitr\Permissions\Exceptions;
 
 class PermissionAlreadyExists extends \Exception
 {
-    public static function create(string $name, string $guard): self
+    public static function create(string $name): self
     {
-        return new static("A `{$name}` permission already exists for guard `{$guard}`.");
+        return new static("A `{$name}` permission already exists.");
     }
 }

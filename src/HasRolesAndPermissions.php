@@ -4,6 +4,7 @@ namespace Denismitr\LTP;
 
 use Denismitr\Permissions\Models\Permission;
 use Denismitr\Permissions\Models\Role;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 trait HasRolesAndPermissions
 {
@@ -32,9 +33,9 @@ trait HasRolesAndPermissions
     }
 
     /**
-     * Give the user a certain permission|s
-     * @param  string $permissions
+     * @param array ...$permissions
      * @return $this
+     * @throws \Denismitr\Permissions\Exceptions\PermissionDoesNotExist
      */
     public function givePermissionTo(...$permissions)
     {
@@ -42,7 +43,7 @@ trait HasRolesAndPermissions
             if ($this->hasPermissionTo($permission)) {
                 unset($permissions[$key]);
             } else {
-                $permissions[$key] = Permission::fromName($permission);
+                $permissions[$key] = Permission::findByName($permission);
             }
         }
 
@@ -70,9 +71,7 @@ trait HasRolesAndPermissions
     }
 
     /**
-     * Strip user from a givern permission
-     *
-     * @param  string $permissions
+     * @param array ...$permissions
      * @return $this
      */
     public function withdrawPermissionTo(...$permissions)
@@ -87,10 +86,9 @@ trait HasRolesAndPermissions
     }
 
     /**
-     * Update permission for a user
-     *
-     * @param  [string] $permissions
+     * @param array ...$permissions
      * @return $this
+     * @throws \Denismitr\Permissions\Exceptions\PermissionDoesNotExist
      */
     public function updatePermissions(...$permissions)
     {
@@ -100,16 +98,15 @@ trait HasRolesAndPermissions
     }
 
     /**
-     * Give a role to the user
-     *
-     * @param  string $roles
+     * @param array ...$roles
      * @return $this
+     * @throws \Denismitr\Permissions\Exceptions\RoleDoesNotExist
      */
     public function assignRole(...$roles)
     {
         foreach ($roles as $role) {
             if ( ! $this->hasRole($role) ) {
-                $role = Role::fromName($role);
+                $role = Role::findByName($role);
 
                 $this->roles()->attach($role);
 
@@ -121,9 +118,7 @@ trait HasRolesAndPermissions
     }
 
     /**
-     * Check if user has role
-     *
-     * @param  string $roles
+     * @param array ...$roles
      * @return bool
      */
     public function hasRole(...$roles)
@@ -140,7 +135,7 @@ trait HasRolesAndPermissions
     /**
      *  Get roles of the user
      *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function roles()
     {
@@ -150,22 +145,21 @@ trait HasRolesAndPermissions
     /**
      *  Get permissions for user
      *
-     * @return Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function permissions()
+    public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class, 'users_permissions');
     }
 
     /**
-     * See if user has permission through roles
-     *
-     * @param  string  $name
+     * @param string $name
      * @return bool
+     * @throws \Denismitr\Permissions\Exceptions\PermissionDoesNotExist
      */
     protected function hasPermissionThroughRole(string $name)
     {
-        $permission = Permission::byName($name);
+        $permission = Permission::findByName($name);
 
         if (! $permission) {
             return false;
@@ -191,6 +185,10 @@ trait HasRolesAndPermissions
         return (bool) $this->permissions->where('name', $name)->count();
     }
 
+    /**
+     * @param array $permissions
+     * @return mixed
+     */
     protected function getAllPermissions(array $permissions)
     {
         return Permission::whereIn('name', $permissions)->get();
