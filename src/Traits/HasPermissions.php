@@ -31,17 +31,11 @@ trait HasPermissions
     */
 
     /**
-     * A model may have multiple direct permissions.
+     * @return mixed
      */
-    public function permissions(): MorphToMany
+    public function permissions()
     {
-        return $this->morphToMany(
-            config('permissions.models.permission'),
-            'user',
-            config('permissions.table_names.user_permissions'),
-            'user_id',
-            'permission_id'
-        );
+        return $this->belongsToMany(Permission::class, 'user_permissions');
     }
 
     /**
@@ -54,7 +48,7 @@ trait HasPermissions
         $permissions = $this->resolvePermissions($permissions);
 
         $rolesWithPermissions = $permissions->map(function($permission) {
-                return $permission->roles->all();
+                return $permission->groups->all();
             })->flatten()->unique();
 
         return $query->where(function ($query) use ($permissions, $rolesWithPermissions) {
@@ -69,7 +63,7 @@ trait HasPermissions
             });
 
             if ($rolesWithPermissions->count() > 0) {
-                $query->orWhereHas('roles', function ($query) use ($rolesWithPermissions) {
+                $query->orWhereHas('authGroups', function ($query) use ($rolesWithPermissions) {
                     $query->where(function ($query) use ($rolesWithPermissions) {
                           foreach ($rolesWithPermissions as $role) {
                               $query->orWhere(
@@ -102,9 +96,9 @@ trait HasPermissions
         return $this->hasDirectPermission($permission) || $this->hasPermissionViaRole($permission);
     }
 
-    protected function hasPermissionViaRole(Permission $permission): bool
+    protected function hasPermissionViaAuthGroup(Permission $permission): bool
     {
-        return $this->hasRole($permission->roles);
+        return $this->isOneOf($permission->groups);
     }
 
     /**

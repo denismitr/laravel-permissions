@@ -4,14 +4,14 @@ namespace Denismitr\Permissions\Models;
 
 
 use Denismitr\Permissions\Contracts\UserRole;
-use Denismitr\Permissions\Exceptions\RoleAlreadyExists;
-use Denismitr\Permissions\Exceptions\RoleDoesNotExist;
+use Denismitr\Permissions\Exceptions\AuthGroupAlreadyExists;
+use Denismitr\Permissions\Exceptions\AuthGroupDoesNotExist;
 use Denismitr\Permissions\Traits\HasPermissions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-class Role extends Model implements UserRole
+class AuthGroup extends Model implements UserRole
 {
     use HasPermissions;
 
@@ -20,12 +20,12 @@ class Role extends Model implements UserRole
     /**
      * @param array $attributes
      * @return $this|Model
-     * @throws RoleAlreadyExists
+     * @throws AuthGroupAlreadyExists
      */
     public static function create(array $attributes = [])
     {
         if (static::whereName($attributes['name'])->first()) {
-            throw RoleAlreadyExists::create($attributes['name']);
+            throw AuthGroupAlreadyExists::create($attributes['name']);
         }
 
         return static::query()->create($attributes);
@@ -33,15 +33,15 @@ class Role extends Model implements UserRole
 
     /**
      * @param string $name
-     * @return Role
-     * @throws RoleDoesNotExist
+     * @return AuthGroup
+     * @throws AuthGroupDoesNotExist
      */
     public static function findByName(string $name): self
     {
         $role = static::query()->whereName($name)->first();
 
         if ( ! $role ) {
-            throw RoleDoesNotExist::create($name);
+            throw AuthGroupDoesNotExist::create($name);
         }
 
         return $role;
@@ -49,16 +49,16 @@ class Role extends Model implements UserRole
 
     /**
      * @param int $id
-     * @return Role
-     * @throws RoleDoesNotExist
+     * @return AuthGroup
+     * @throws AuthGroupDoesNotExist
      */
     public static function findById(int $id): self
     {
-        /** @var Role $role */
+        /** @var AuthGroup $role */
         $role = static::query()->find($id);
 
         if ( ! $role ) {
-            throw RoleDoesNotExist::createWithId($id);
+            throw AuthGroupDoesNotExist::createWithId($id);
         }
 
         return $role;
@@ -68,7 +68,7 @@ class Role extends Model implements UserRole
      * @param string $name
      * @param null $guard
      * @return UserRole
-     * @throws RoleAlreadyExists
+     * @throws AuthGroupAlreadyExists
      */
     public static function findOrCreate(string $name, $guard = null): UserRole
     {
@@ -86,9 +86,8 @@ class Role extends Model implements UserRole
      */
     public function permissions(): BelongsToMany
     {
-        return $this->belongsToMany(
-            config('permissions.models.permission'),
-            config('permissions.table_names.role_permissions')
+        return $this->belongsToMany(Permission::class,
+            config('permissions.table_names.auth_group_permissions')
         );
     }
 

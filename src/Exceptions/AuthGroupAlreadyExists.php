@@ -4,10 +4,10 @@
 namespace Denismitr\Permissions\Exceptions;
 
 
-class RoleAlreadyExists extends \Exception
+class AuthGroupAlreadyExists extends \Exception
 {
     public static function create(string $name): self
     {
-        return new static("A `{$name}` role already exists.");
+        return new static("A `{$name}` auth group already exists.");
     }
 }

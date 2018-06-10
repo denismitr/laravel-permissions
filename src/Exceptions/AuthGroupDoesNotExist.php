@@ -4,23 +4,23 @@
 namespace Denismitr\Permissions\Exceptions;
 
 
-class RoleDoesNotExist extends \Exception
+class AuthGroupDoesNotExist extends \Exception
 {
     /**
      * @param string $name
-     * @return RoleDoesNotExist
+     * @return AuthGroupDoesNotExist
      */
     public static function create(string $name): self
     {
-        return new static("A `{$name}` role does not exist.");
+        return new static("A `{$name}` auth group does not exist.");
     }
 
     /**
      * @param int $id
-     * @return RoleDoesNotExist
+     * @return AuthGroupDoesNotExist
      */
     public static function createWithId(int $id): self
     {
-        return new static("A role with `{$id}` does not exist.");
+        return new static("An auth group with `{$id}` does not exist.");
     }
 }

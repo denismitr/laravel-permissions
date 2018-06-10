@@ -3,16 +3,16 @@
 return [
     'models' => [
         'permission' => \Denismitr\Permissions\Models\Permission::class,
-        'role' => \Denismitr\Permissions\Models\Role::class,
+        'role' => \Denismitr\Permissions\Models\AuthGroup::class,
         'user' => 'App\User',
     ],
 
     'table_names' => [
-        'roles' => 'roles',
+        'auth_groups' => 'auth_groups',
         'permissions' => 'permissions',
         'user_permissions' => 'user_permissions',
-        'user_roles' => 'user_roles',
-        'role_permissions' => 'role_permissions'
+        'auth_group_users' => 'auth_group_users',
+        'auth_group_permissions' => 'auth_group_permissions'
     ],
 
     'cache_expiration_time' => 60 * 24,

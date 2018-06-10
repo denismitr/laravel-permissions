@@ -71,16 +71,8 @@ class PermissionsServiceProvider extends ServiceProvider
         $timestamp = date('Y_m_d_His', time());
 
         $this->publishes([
-            __DIR__ . './../migrations/create_roles_table.php' =>
-                database_path("/migrations/{$timestamp}_create_roles_table.php"),
-            __DIR__ . './../migrations/create_permissions_table.php' =>
-                database_path("/migrations/{$timestamp}_create_permissions_table.php"),
-            __DIR__ . './../migrations/create_user_roles_table.php' =>
-                database_path("/migrations/{$timestamp}_create_user_roles_table.php"),
-            __DIR__ . './../migrations/create_user_permissions_table.php' =>
-                database_path("/migrations/{$timestamp}_create_user_permissions_table.php"),
-            __DIR__ . './../migrations/create_role_permissions_table.php' =>
-                database_path("/migrations/{$timestamp}_create_role_permissions_table.php"),
+            __DIR__ . './../migrations/create_laravel_permissions.php' =>
+                database_path("/migrations/{$timestamp}_create_laravel_permissions.php"),
         ]);
     }
 }

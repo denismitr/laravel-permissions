@@ -59,7 +59,7 @@ class PermissionLoader
     public function getPermissions(): Collection
     {
         return $this->cache->remember($this->cacheKey, config('permissions.cache_expiration_time'), function () {
-            return app(Permission::class)->with('roles')->get();
+            return app(Permission::class)->with('groups')->get();
         });
     }
 }

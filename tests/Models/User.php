@@ -6,7 +6,7 @@ namespace Denismitr\Permissions\Test\Models;
 
 use Denismitr\Permissions\Traits\CacheablePermissions;
 use Denismitr\Permissions\Traits\HasPermissions;
-use Denismitr\Permissions\Traits\HasRoles;
+use Denismitr\Permissions\Traits\BelongsToAuthGroups;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -15,7 +15,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 
 class User extends Model implements AuthorizableContract, AuthenticatableContract
 {
-    use Authorizable, Authenticatable, HasRoles, CacheablePermissions;
+    use Authorizable, Authenticatable, BelongsToAuthGroups, CacheablePermissions;
 
     /**
      * The attributes that are mass assignable.

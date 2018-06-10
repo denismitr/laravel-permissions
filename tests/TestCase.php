@@ -5,7 +5,7 @@ namespace Denismitr\Permissions\Test;
 
 
 use Denismitr\Permissions\Models\Permission;
-use Denismitr\Permissions\Models\Role;
+use Denismitr\Permissions\Models\AuthGroup;
 use Denismitr\Permissions\PermissionsServiceProvider;
 use Denismitr\Permissions\PermissionLoader;
 use Denismitr\Permissions\Test\Models\Admin;
@@ -22,24 +22,9 @@ abstract class TestCase extends OrchestraTestCase
     protected $user;
 
     /**
-     * @var Admin
+     * @var User
      */
     protected $admin;
-
-    /**
-     * @var Role
-     */
-    protected $userRole;
-
-    /**
-     * @var Role
-     */
-    protected $premiumRole;
-
-    /**
-     * @var Role
-     */
-    protected $adminRole;
 
     /**
      * @var Permission
@@ -60,6 +45,21 @@ abstract class TestCase extends OrchestraTestCase
      * @var Permission
      */
     protected $editBlogPermission;
+
+    /**
+     * @var AuthGroup
+     */
+    protected $usersGroup;
+
+    /**
+     * @var AuthGroup
+     */
+    protected $staffGroup;
+
+    /**
+     * @var AuthGroup
+     */
+    protected $adminsGroup;
 
 
     public function setUp()
@@ -87,10 +87,6 @@ abstract class TestCase extends OrchestraTestCase
             'prefix'   => '',
         ]);
 
-        // Set-up admin guard
-        $app['config']->set('auth.guards.admin', ['driver' => 'session', 'provider' => 'admins']);
-        $app['config']->set('auth.providers.admins', ['driver' => 'eloquent', 'model' => Admin::class]);
-
         // Use test User model for users provider
         $app['config']->set('auth.providers.users.model', User::class);
         $app['config']->set('permissions.models.user', User::class);
@@ -103,29 +99,16 @@ abstract class TestCase extends OrchestraTestCase
             $table->string('email');
         });
 
-        $app['db']->connection()->getSchemaBuilder()->create('admins', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('email');
-        });
+        include_once __DIR__.'/../migrations/create_laravel_permissions.php';
 
-        include_once __DIR__.'/../migrations/create_roles_table.php';
-        include_once __DIR__.'/../migrations/create_permissions_table.php';
-        include_once __DIR__.'/../migrations/create_user_roles_table.php';
-        include_once __DIR__.'/../migrations/create_user_permissions_table.php';
-        include_once __DIR__.'/../migrations/create_role_permissions_table.php';
+        (new \CreateLaravelPermissions())->up();
 
-        (new \CreateRolesTable())->up();
-        (new \CreatePermissionsTable())->up();
-        (new \CreateUserRolesTable())->up();
-        (new \CreateUserPermissionsTable())->up();
-        (new \CreateRolePermissionsTable())->up();
+        $this->user = User::create(['email' => 'user@test.com']);
+        $this->admin = User::create(['email' => 'admin@test.com']);
 
-        $this->user = User::create(['email' => 'test@user.com']);
-        $this->admin = Admin::create(['email' => 'admin@user.com']);
-
-        $this->userRole = $app[Role::class]->create(['name' => 'ROLE_USER']);
-        $this->premiumRole = $app[Role::class]->create(['name' => 'ROLE_PREMIUM']);
-        $this->adminRole = $app[Role::class]->create(['name' => 'ROLE_ADMIN']);
+        $this->usersGroup = $app[AuthGroup::class]->create(['name' => 'users']);
+        $this->staffGroup = $app[AuthGroup::class]->create(['name' => 'staff']);
+        $this->adminsGroup = $app[AuthGroup::class]->create(['name' => 'admins']);
 
         $this->editArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles']);
         $this->editNewsPermission = $app[Permission::class]->create(['name' => 'edit-news']);
@@ -155,13 +138,5 @@ abstract class TestCase extends OrchestraTestCase
     public function refreshAdmin()
     {
         $this->admin = $this->admin->fresh();
-    }
-
-    /**
-     * Refresh the testAdmin.
-     */
-    public function refreshUserRole()
-    {
-        $this->userRole = $this->userRole->fresh();
     }
 }
