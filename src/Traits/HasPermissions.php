@@ -43,7 +43,7 @@ trait HasPermissions
      * @param $permissions
      * @return Builder
      */
-    public function scopePermission(Builder $query, $permissions): Builder
+    public function scopeWithPermissions(Builder $query, $permissions): Builder
     {
         $permissions = $this->resolvePermissions($permissions);
 
@@ -67,7 +67,7 @@ trait HasPermissions
                     $query->where(function ($query) use ($rolesWithPermissions) {
                           foreach ($rolesWithPermissions as $role) {
                               $query->orWhere(
-                                  config('permissions.table_names.roles').'.id',
+                                  config('permissions.table_names.auth_groups').'.id',
                                   $role->id
                               );
                           }
@@ -93,7 +93,7 @@ trait HasPermissions
             $permission = app(Permission::class)->findByName($permission);
         }
 
-        return $this->hasDirectPermission($permission) || $this->hasPermissionViaRole($permission);
+        return $this->hasDirectPermission($permission) || $this->hasPermissionViaAuthGroup($permission);
     }
 
     protected function hasPermissionViaAuthGroup(Permission $permission): bool

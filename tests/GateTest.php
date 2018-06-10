@@ -39,11 +39,11 @@ class GateTest extends TestCase
     }
 
     /** @test */
-    public function it_can_determine_if_a_user_has_a_permission_through_roles()
+    public function it_can_determine_if_a_user_has_a_permission_through_groups()
     {
-        $this->userRole->givePermissionTo($this->editArticlesPermission);
+        $this->usersGroup->givePermissionTo($this->editArticlesPermission);
 
-        $this->user->assignRole($this->userRole);
+        $this->user->joinAuthGroup($this->usersGroup);
 
         $this->assertTrue($this->user->hasPermissionTo($this->editArticlesPermission));
 
@@ -53,11 +53,11 @@ class GateTest extends TestCase
     }
 
     /** @test */
-    public function it_can_determine_if_a_user_with_a_different_guard_has_a_permission_when_using_roles()
+    public function it_can_determine_if_a_user_with_a_different_guard_has_a_permission_when_using_groups()
     {
-        $this->adminRole->givePermissionTo($this->adminPermission);
+        $this->adminsGroup->givePermissionTo($this->adminPermission);
 
-        $this->admin->assignRole($this->adminRole);
+        $this->admin->joinAuthGroup($this->adminsGroup);
 
         $this->assertTrue($this->admin->hasPermissionTo($this->adminPermission));
 
