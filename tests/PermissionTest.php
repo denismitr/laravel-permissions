@@ -6,7 +6,6 @@ namespace Denismitr\Permissions\Test;
 
 use Denismitr\Permissions\Exceptions\PermissionAlreadyExists;
 use Denismitr\Permissions\Models\Permission;
-use Denismitr\Permissions\Test\Models\Admin;
 use Denismitr\Permissions\Test\Models\User;
 
 class PermissionTest extends TestCase
