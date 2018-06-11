@@ -6,14 +6,15 @@ namespace Denismitr\Permissions\Models;
 use Denismitr\Permissions\Contracts\UserRole;
 use Denismitr\Permissions\Exceptions\AuthGroupAlreadyExists;
 use Denismitr\Permissions\Exceptions\AuthGroupDoesNotExist;
-use Denismitr\Permissions\Traits\HasPermissions;
+use Denismitr\Permissions\Traits\AuthGroupPermissions;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class AuthGroup extends Model implements UserRole
 {
-    use HasPermissions;
+    use AuthGroupPermissions;
 
     protected $guarded = ['id'];
 
@@ -39,6 +40,42 @@ class AuthGroup extends Model implements UserRole
     public static function named(string $name): self
     {
         return static::findByName($name);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * @return BelongsTo
+     */
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(config('permissions.models.user'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Getters
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * @return bool
+     */
+    public function hasOwner(): bool
+    {
+        return !! $this->owner_id;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTeam(): bool
+    {
+        return $this->hasOwner();
     }
 
     /**
@@ -97,7 +134,7 @@ class AuthGroup extends Model implements UserRole
     public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class,
-            config('permissions.table_names.auth_group_permissions')
+            config('permissions.tables.auth_group_permissions')
         );
     }
 

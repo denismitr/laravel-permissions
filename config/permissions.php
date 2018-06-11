@@ -3,7 +3,7 @@
 return [
     'models' => [
         'permission' => \Denismitr\Permissions\Models\Permission::class,
-        'role' => \Denismitr\Permissions\Models\AuthGroup::class,
+        'auth_group' => \Denismitr\Permissions\Models\AuthGroup::class,
         'user' => 'App\User',
     ],
 

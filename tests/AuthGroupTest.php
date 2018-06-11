@@ -22,6 +22,42 @@ class AuthGroupTest extends TestCase
         Permission::create(['name' => 'other-permission']);
     }
 
+    /**
+     * @test
+     * @throws AuthGroupAlreadyExists
+     */
+    public function it_can_be_created_without_owner()
+    {
+        $authGroup = AuthGroup::create(['name' => 'New auth group']);
+
+        $this->assertInstanceOf(AuthGroup::class, $authGroup);
+        $this->assertEquals('New auth group', $authGroup->name);
+        $this->assertNull($authGroup->owner);
+        $this->assertFalse($authGroup->hasOwner());
+        $this->assertFalse($authGroup->isTeam());
+    }
+
+    /**
+     * @test
+     * @throws AuthGroupAlreadyExists
+     */
+    public function it_can_be_created_with_owner()
+    {
+        $authGroup = AuthGroup::create([
+            'name' => 'New auth group',
+            'description' => 'Some description',
+            'owner_id' => $this->user->id
+        ]);
+
+        $this->assertInstanceOf(AuthGroup::class, $authGroup);
+        $this->assertEquals('New auth group', $authGroup->name);
+        $this->assertEquals('Some description', $authGroup->description);
+        $this->assertInstanceOf(User::class, $authGroup->owner);
+        $this->assertTrue($authGroup->owner->is($this->user));
+        $this->assertTrue($authGroup->hasOwner());
+        $this->assertTrue($authGroup->isTeam());
+    }
+
     /** @test */
     public function it_throws_an_exception_when_the_role_already_exists()
     {

@@ -21,46 +21,73 @@ Denismitr\Permissions\PermissionsServiceProvider::class,
 Then if you need to use middleware, you can add a `role` middleware to your Http `Kernel.php` like so:
 
 ```php
-'role' => \Denismitr\Permissions\Middleware\RoleMiddleware::class
+
 ```
 
 You can utilize an Interface
 ```php
-Denismitr\Permissions\Contracts\RolesAndPermissionsInterface::class
+
 ```
 
-Then run `php artisan migrate` and the following _5_ tables will be created:
+Then run `php artisan migrate` and the following _5_ migrations will be created:
 
-* permissions
-* roles
-* roles_permissions
-* users_permissions
-* users_roles
 
-Creating the __CRUD__ and populating thoses tables is up to you.
+
+Creating the __CRUD__ and populating these tables is up to you.
 
 ## Usage
 
-First include `HasPermissionsTrait` trait into the `User` model like so:
+First include `InteractsWithAuthGroups` trait into the `User` model like so:
 
 ```php
-use ..., HasRolesAndPermissions;
+use InteractsWithAuthGroups;
 ```
 
-To give permissions to a user:
+To add users to an AuthGroup and give them group permissions:
 
 ```php
-$user->givePermissionTo('add post', 'edit post');
+// Given we have
+AuthGroup::create(['name' => 'superusers']);
+
+// To find an auth group by name
+AuthGroup::named('superusers')->addUser($userA)->addUser($userB);
+
+$userA->isOneOf('superusers'); //true
+$userB->isOneOf('superusers'); // true
+
+AuthGroup::named('superusers')->givePermissionTo($editArticlesPermission);
+AuthGroup::named('superusers')->givePermissionTo($editBlogPermission);
+
+$userA->hasPermissionTo('edit-articles'); // true
+$userA->isAllowedTo('edit-blog'); // true
+
+$userB->hasPermissionTo('edit-blog'); // true
+$userB->isAllowedTo('edit-articles'); // true
+```
+
+User can create personal or team auth group. Note that there is a `canOwnAuthGroups` method on
+`InteractsWithAuthGroups` trait that always returns `true`. If you want to define some custom rules on
+whether this or that user is allowed to create auth groups/teams, which you probably do, you need to 
+override that method in your user model. 
+```php
+$authGroup = $this->owner->createNewAuthGroup([
+    'name' => 'Acme',
+    'description' => 'My company auth group',
+]);
+
+$authGroup
+    ->addUser($this->userA)
+    ->addUser($this->userB);
 ```
 
 To withdraw permissions
 ```php
-$user->withdrawPermissionTo('delete post', 'edit post');
+$authGroup->revokePermissionTo('delete post', 'edit post');
 ```
 
 To check for a role:
 ```php
-$user->hasRole('admin');
+
 ```
 
 To check for permissions:
@@ -71,21 +98,11 @@ $user->can('delete post');
 
 Attention!!! for compatibility reasons the ```can``` method can support only single ability argument
 
-Create roles:
-```php
-$adminRole = Role::fromName('admin');
-$adminRole->givePermissionTo('add post', 'delete post');
-```
 
 You can specify any names of the roles and permissions.
 
-Plus a bonus a __blade__ `role` directive:
+Plus a bonus a __blade__ `team` directive:
 
-```php
-@role('staff')
-...
-@endrole
-```
 
 ### Author
 

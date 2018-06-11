@@ -4,15 +4,16 @@
 namespace Denismitr\Permissions\Traits;
 
 
+use Denismitr\Permissions\Exceptions\UserCannotOwnAuthGroups;
 use Denismitr\Permissions\Models\AuthGroup;
+use Denismitr\Permissions\Models\Permission;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 
-trait BelongsToAuthGroups
+trait InteractsWithAuthGroups
 {
-    use HasPermissions;
-
     public static function bootBelongsToAuthGroup()
     {
         static::deleting(function ($model) {
@@ -26,15 +27,52 @@ trait BelongsToAuthGroups
 
     /*
     |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * @return mixed
+     */
+    public function ownedAuthGroups(): HasMany
+    {
+        return $this->hasMany(config('permissions.models.auth_group'), 'owner_id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | Actions
     |--------------------------------------------------------------------------
     */
 
-    public function switchToAuthGroup(AuthGroup $authGroup)
+    /**
+     * @param array $attributes
+     * @return AuthGroup
+     * @throws UserCannotOwnAuthGroups
+     * @throws \Denismitr\Permissions\Exceptions\AuthGroupAlreadyExists
+     */
+    public function createNewAuthGroup(array $attributes = []): AuthGroup
+    {
+        if ($this->canOwnAuthGroups()) {
+            return $this->switchToAuthGroup(
+                AuthGroup::create(
+                    array_merge($attributes, [
+                        'owner_id' => $this->id
+                    ])
+                )
+            );
+        }
+
+        throw new UserCannotOwnAuthGroups;
+    }
+
+    public function switchToAuthGroup(AuthGroup $authGroup): AuthGroup
     {
         $this->current_auth_group_id = $authGroup->id;
 
         $this->save();
+
+        return $authGroup;
     }
 
     /**
@@ -87,6 +125,42 @@ trait BelongsToAuthGroups
     |--------------------------------------------------------------------------
     */
 
+    public function canOwnAuthGroups(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @param $permission
+     * @return bool
+     */
+    public function hasPermissionTo($permission): bool
+    {
+        if (is_string($permission)) {
+            $permission = app(Permission::class)->findByName($permission);
+        }
+
+        return $this->hasPermissionThroughAuthGroup($permission);
+    }
+
+    /**
+     * @param $permission
+     * @return bool
+     */
+    public function isAllowedTo($permission): bool
+    {
+        return $this->hasPermissionTo($permission);
+    }
+
+    /**
+     * @param $permission
+     * @return bool
+     */
+    public function hasPermissionThroughAuthGroup($permission): bool
+    {
+        return $this->isOneOf($permission->groups);
+    }
+
     /**
      * @param $groups
      * @return bool
@@ -98,11 +172,11 @@ trait BelongsToAuthGroups
         }
 
         if (is_string($groups)) {
-            return $this->authGroups->contains('name', $groups);
+            return $this->belongsToOrOwnsAuthGroupBy('name', $groups);
         }
 
         if ($groups instanceof AuthGroup) {
-            return $this->authGroups->contains('id', $groups->id);
+            return $this->belongsToOrOwnsAuthGroupBy('id', $groups->id);
         }
 
         if (is_array($groups)) {
@@ -140,6 +214,20 @@ trait BelongsToAuthGroups
         });
 
         return $groups->intersect($this->authGroups->pluck('name')) == $groups;
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return bool
+     */
+    protected function belongsToOrOwnsAuthGroupBy($key, $value): bool
+    {
+        if ($this->ownedAuthGroups->contains($key, $value)) {
+            return true;
+        }
+
+        return $this->authGroups->contains($key, $value);
     }
 
     /**

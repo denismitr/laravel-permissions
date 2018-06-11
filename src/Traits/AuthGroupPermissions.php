@@ -5,13 +5,14 @@ namespace Denismitr\Permissions\Traits;
 
 
 use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
+use Denismitr\Permissions\Models\AuthGroup;
 use Denismitr\Permissions\Models\Permission;
 use Denismitr\Permissions\PermissionLoader;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 
-trait HasPermissions
+trait AuthGroupPermissions
 {
     public static function bootHasPermissions()
     {
@@ -26,17 +27,9 @@ trait HasPermissions
 
     /*
     |--------------------------------------------------------------------------
-    | Relationships and scopes
+    | Relationships
     |--------------------------------------------------------------------------
     */
-
-    /**
-     * @return mixed
-     */
-    public function permissions()
-    {
-        return $this->belongsToMany(Permission::class, 'user_permissions');
-    }
 
     /**
      * @param Builder $query
@@ -56,7 +49,7 @@ trait HasPermissions
 
                 foreach ($permissions as $permission) {
                     $query->where(
-                        config('permissions.table_names.permissions').'.id',
+                        config('permissions.tables.permissions').'.id',
                         $permission->id
                     );
                 }
@@ -67,7 +60,7 @@ trait HasPermissions
                     $query->where(function ($query) use ($rolesWithPermissions) {
                           foreach ($rolesWithPermissions as $role) {
                               $query->orWhere(
-                                  config('permissions.table_names.auth_groups').'.id',
+                                  config('permissions.tables.auth_groups').'.id',
                                   $role->id
                               );
                           }
@@ -208,14 +201,27 @@ trait HasPermissions
 
     /**
      * @param $permission
-     * @return $this
+     * @return AuthGroup
      * @throws PermissionDoesNotExist
      */
-    public function revokePermissionTo($permission)
+    public function revokePermissionTo($permission): AuthGroup
     {
         $this->permissions()->detach($this->getPermission($permission));
 
+        $this->forgetCachedPermissions();
+        $this->load('permissions');
+
         return $this;
+    }
+
+    /**
+     * @param $permission
+     * @return AuthGroup
+     * @throws PermissionDoesNotExist
+     */
+    public function withdrawPermissionTo($permission): AuthGroup
+    {
+        return $this->revokePermissionTo($permission);
     }
 
     /**

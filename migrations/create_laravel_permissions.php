@@ -49,28 +49,11 @@ class CreateLaravelPermissions extends Migration
             $table->unique(['permission_id', 'auth_group_id']);
         });
 
-        Schema::create('user_permissions', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('permission_id');
-            $table->unsignedInteger('user_id');
-
-            $table->foreign('permission_id')
-                ->references('id')
-                ->on('permissions')
-                ->onDelete('cascade');
-
-            $table->foreign('user_id')
-                ->references('id')
-                ->on('users')
-                ->onDelete('cascade');
-
-            $table->unique(['user_id', 'permission_id']);
-        });
-
         Schema::create('auth_group_users', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('auth_group_id');
             $table->unsignedInteger('user_id');
+            $table->string('role', 100)->nullable();
 
             $table->foreign('auth_group_id')
                 ->references('id')
@@ -83,6 +66,25 @@ class CreateLaravelPermissions extends Migration
                 ->onDelete('cascade');
 
             $table->unique(['user_id', 'auth_group_id']);
+        });
+
+        Schema::create('auth_group_user_permissions', function (Blueprint $table) {
+            $table->increments('id');
+            $table->unsignedInteger('auth_group_user_id');
+            $table->unsignedInteger('permission_id');
+
+
+            $table->foreign('auth_group_user_id')
+                ->references('id')
+                ->on('auth_group_users')
+                ->onDelete('cascade');
+
+            $table->foreign('permission_id')
+                ->references('id')
+                ->on('permissions')
+                ->onDelete('cascade');
+
+            $table->unique(['auth_group_user_id', 'permission_id']);
         });
 
         Schema::table(config('permissions.tables.users'), function (Blueprint $table) {
