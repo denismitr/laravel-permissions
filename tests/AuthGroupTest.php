@@ -153,4 +153,52 @@ class AuthGroupTest extends TestCase
 
         $this->assertInstanceOf(AuthGroup::class, $groupB);
     }
+
+    /**
+     * @test
+     * @throws AuthGroupAlreadyExists
+     * @throws AuthGroupDoesNotExist
+     */
+    public function user_can_be_added_to_an_auth_group()
+    {
+        $authGroup = AuthGroup::create(['name' => 'My auth group']);
+
+        AuthGroup::named('My auth group')->addUser($this->user);
+
+        $this->assertTrue($this->user->isOneOf('My auth group'));
+        $this->assertCount(1, $authGroup->users);
+        $this->assertTrue($authGroup->users->first()->is($this->user));
+    }
+    
+    /** @test */
+    public function multiple_users_can_be_added_to_auth_group()
+    {
+        $authGroup = AuthGroup::create(['name' => 'My auth group']);
+        $userA = User::create(['email' => 'user.a@test.com']);
+        $userB = User::create(['email' => 'user.b@test.com']);
+
+        AuthGroup::named('My auth group')->addUser($userA)->addUser($userB);
+
+        $this->assertTrue($userA->isOneOf('My auth group'));
+        $this->assertTrue($userB->isOneOf('My auth group'));
+        $this->assertCount(2, $authGroup->users);
+        $this->assertTrue($authGroup->users->contains('id', $userA->id));
+        $this->assertTrue($authGroup->users->contains('id', $userB->id));
+    }
+
+    /** @test */
+    public function user_can_belong_to_several_groups()
+    {
+        $this->usersGroup->addUser($this->user);
+        $this->adminsGroup->addUser($this->user);
+
+        $this->assertTrue($this->user->isOneOf('users'));
+        $this->assertTrue($this->user->isOneOf($this->usersGroup));
+
+        $this->assertTrue($this->user->isOneOf('admins'));
+        $this->assertTrue($this->user->isOneOf($this->adminsGroup));
+
+        $this->assertTrue($this->user->isOneOfAll('admins', 'users'));
+        $this->assertTrue($this->user->isOneOfAll($this->usersGroup, $this->adminsGroup));
+    }
 }

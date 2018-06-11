@@ -7,7 +7,8 @@ return [
         'user' => 'App\User',
     ],
 
-    'table_names' => [
+    'tables' => [
+        'users' => 'users',
         'auth_groups' => 'auth_groups',
         'permissions' => 'permissions',
         'user_permissions' => 'user_permissions',

@@ -36,6 +36,16 @@ class AuthGroup extends Model implements UserRole
      * @return AuthGroup
      * @throws AuthGroupDoesNotExist
      */
+    public static function named(string $name): self
+    {
+        return static::findByName($name);
+    }
+
+    /**
+     * @param string $name
+     * @return AuthGroup
+     * @throws AuthGroupDoesNotExist
+     */
     public static function findByName(string $name): self
     {
         $role = static::query()->whereName($name)->first();
@@ -93,16 +103,13 @@ class AuthGroup extends Model implements UserRole
 
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphToMany
+     * @return BelongsToMany
      */
-    public function users(): MorphToMany
+    public function users(): BelongsToMany
     {
-        return $this->morphedByMany(
+        return $this->belongsToMany(
             config('permissions.models.user'),
-            'user',
-            'user_roles',
-            'role_id',
-            'user_id'
+            'auth_group_users'
         );
     }
 
@@ -119,5 +126,29 @@ class AuthGroup extends Model implements UserRole
         }
 
         return !! $this->permissions->where('name', $permission)->count();
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | Actions
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * @param $user
+     * @return AuthGroup
+     */
+    public function addUser($user): self
+    {
+        $model = config('permissions.models.user');
+
+        if ( ! $user instanceof $model) {
+            throw new \InvalidArgumentException(
+                'User must be an instance of ' . config('permissions.models.user') . '.'
+            );
+        }
+
+        $this->users()->save($user);
+
+        return $this;
     }
 }

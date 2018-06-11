@@ -16,6 +16,8 @@ class CreateLaravelPermissions extends Migration
         Schema::create('auth_groups', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 100);
+            $table->string('description')->nullable();
+            $table->unsignedInteger('owner_id')->nullable();
             $table->timestamps();
 
             $table->unique('name');
@@ -82,6 +84,10 @@ class CreateLaravelPermissions extends Migration
 
             $table->unique(['user_id', 'auth_group_id']);
         });
+
+        Schema::table(config('permissions.tables.users'), function (Blueprint $table) {
+             $table->unsignedInteger('current_auth_group_id')->nullable();
+        });
     }
 
     /**
@@ -96,5 +102,9 @@ class CreateLaravelPermissions extends Migration
         Schema::dropIfExists('auth_group_permissions');
         Schema::dropIfExists('permissions');
         Schema::dropIfExists('auth_groups');
+
+        Schema::table(config('permissions.models.user'), function (Blueprint $table) {
+            $table->dropColumn('current_auth_group_id');
+        });
     }
 }

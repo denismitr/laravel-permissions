@@ -24,7 +24,23 @@ trait BelongsToAuthGroups
         });
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Actions
+    |--------------------------------------------------------------------------
+    */
 
+    public function switchToAuthGroup(AuthGroup $authGroup)
+    {
+        $this->current_auth_group_id = $authGroup->id;
+
+        $this->save();
+    }
+
+    /**
+     * @param array ...$groups
+     * @return $this
+     */
     public function joinAuthGroup(...$groups)
     {
         $groups = collect($groups)
@@ -40,40 +56,36 @@ trait BelongsToAuthGroups
         return $this;
     }
 
+    /**
+     * @param array ...$groups
+     * @return $this
+     */
     public function syncAuthGroup(...$groups)
     {
         $this->authGroups()->detach();
 
-        return $this->assignRole($groups);
+        return $this->joinAuthGroup($groups);
     }
 
-
-    public function scopeAuthGroups(Builder $query, $groups): Builder
+    /**
+     * Refresh the current auth group for the user.
+     *
+     * @return AuthGroup
+     */
+    public function refreshCurrentAuthGroup(): AuthGroup
     {
-        if ($groups instanceof Collection) {
-            $groups = $groups->all();
-        }
+        $this->current_auth_group_id = null;
 
-        if (! is_array($groups)) {
-            $groups = [$groups];
-        }
+        $this->save();
 
-        $groups = array_map(function ($group) {
-            if ($group instanceof AuthGroup) {
-                return $group;
-            }
-
-            return app(AuthGroup::class)->findByName($group);
-        }, $groups);
-
-        return $query->whereHas('authGroups', function ($query) use ($groups) {
-            $query->where(function ($query) use ($groups) {
-                foreach ($groups as $group) {
-                    $query->orWhere(config('permission.table_names.auth_groups').'.id', $group->id);
-                }
-            });
-        });
+        return $this->currentAuthGroup();
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Getters
+    |--------------------------------------------------------------------------
+    */
 
     /**
      * @param $groups
@@ -105,6 +117,10 @@ trait BelongsToAuthGroups
         return $groups->intersect($this->authGroups)->isNotEmpty();
     }
 
+    /**
+     * @param $groups
+     * @return bool
+     */
     public function isOneOfAll($groups): bool
     {
         if (is_string($groups) && false !== strpos($groups, '|')) {
@@ -124,6 +140,96 @@ trait BelongsToAuthGroups
         });
 
         return $groups->intersect($this->authGroups->pluck('name')) == $groups;
+    }
+
+    /**
+     * Get a current auth group name
+     *
+     * @return string
+     */
+    public function currentAuthGroupName(): ?string
+    {
+        $currentAuthGroup = $this->currentAuthGroup();
+
+        return is_object($currentAuthGroup) ? $currentAuthGroup->name : null;
+    }
+
+    /**
+     * Determine if the user is a member of any auth group
+     *
+     * @return bool
+     */
+    public function belongsToAnyAuthGroup(): bool
+    {
+        return count($this->authGroups) > 0;
+    }
+
+    /**
+     * Determine if the user is a part of an active auth group
+     *
+     * @return bool
+     */
+    public function onActiveAuthGroup()
+    {
+        $authGroup = $this->currentAuthGroup();
+
+        if ( ! $authGroup) {
+            return false;
+        }
+
+        return $authGroup->isActive();
+    }
+
+    /**
+     * Get the team that user is currently viewing.
+     *
+     * @return AuthGroup
+     */
+    public function currentAuthGroup(): AuthGroup
+    {
+        if ( is_null($this->current_auth_group_id) && $this->belongsToAnyAuthGroup() ) {
+            $this->switchToAuthGroup($this->authGroups()->first());
+
+            return $this->currentAuthGroup();
+        } else if ( ! is_null($this->current_auth_group_id) ) {
+            $currentAuthGroup = $this->authGroups()->find($this->current_auth_group_id);
+
+            return $currentAuthGroup ?: $this->refreshCurrentAuthGroup();
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+
+    public function scopeInAuthGroups(Builder $query, $groups): Builder
+    {
+        if ($groups instanceof Collection) {
+            $groups = $groups->all();
+        }
+
+        if (! is_array($groups)) {
+            $groups = [$groups];
+        }
+
+        $groups = array_map(function ($group) {
+            if ($group instanceof AuthGroup) {
+                return $group;
+            }
+
+            return app(AuthGroup::class)->findByName($group);
+        }, $groups);
+
+        return $query->whereHas('authGroups', function ($query) use ($groups) {
+            $query->where(function ($query) use ($groups) {
+                foreach ($groups as $group) {
+                    $query->orWhere(config('permission.table_names.auth_groups').'.id', $group->id);
+                }
+            });
+        });
     }
 
     /**
