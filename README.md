@@ -85,9 +85,19 @@ To withdraw permissions
 $authGroup->revokePermissionTo('delete post', 'edit post');
 ```
 
-To check for a role:
+Grant permission through auth group:
 ```php
+$admin->joinAuthGroup('admins'); // group must already exist
 
+$admin->onAuthGroup('admins')->grantPermissionTo('administrate-blog'); // permission must already exist
+// same as
+$admin->onAuthGroup('admins')->allowTo('administrate-blog'); // permission must already exist
+// or
+$admin->onAuthGroup('admins')->givePermissionTo('administrate-blog');
+
+// later
+
+$blogAdminPermission->isGrantedFor($this->admin);
 ```
 
 To check for permissions:
@@ -98,8 +108,6 @@ $user->can('delete post');
 
 Attention!!! for compatibility reasons the ```can``` method can support only single ability argument
 
-
-You can specify any names of the roles and permissions.
 
 Plus a bonus a __blade__ `team` directive:
 

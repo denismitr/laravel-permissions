@@ -19,16 +19,25 @@ class PermissionTest extends TestCase
         app(Permission::class)->create(['name' => 'test-permission']);
     }
 
-    
-    /** @test */
-    public function it_has_user_model()
+
+    /**
+     * @test
+     * @throws \Denismitr\Permissions\Exceptions\AuthGroupUserNotFound
+     */
+    public function permission_can_be_given_to_auth_group_user()
     {
-        $this->user->givePermissionTo($this->editArticlesPermission);
+        $this->user->joinAuthGroup($this->usersGroup);
 
-        $this->assertCount(1, $this->editArticlesPermission->users);
+        $this->user->onAuthGroup($this->usersGroup)->grantPermissionTo('edit-blog');
 
-        $this->assertTrue($this->editArticlesPermission->users->first()->is($this->user));
+        $this->user->onAuthGroup('users')->allowTo($this->editArticlesPermission);
 
-        $this->assertInstanceOf(User::class, $this->editArticlesPermission->users->first());
+        $this->assertTrue($this->editArticlesPermission->isGrantedFor($this->user));
+
+        $this->admin->joinAuthGroup('admins');
+
+        $this->admin->onAuthGroup('admins')->grantPermissionTo('administrate-blog');
+
+        $this->assertTrue($this->blogAdminPermission->isGrantedFor($this->admin));
     }
 }

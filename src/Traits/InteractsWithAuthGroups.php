@@ -6,7 +6,9 @@ namespace Denismitr\Permissions\Traits;
 
 use Denismitr\Permissions\Exceptions\UserCannotOwnAuthGroups;
 use Denismitr\Permissions\Models\AuthGroup;
+use Denismitr\Permissions\Models\AuthGroupUser;
 use Denismitr\Permissions\Models\Permission;
+use Denismitr\Permissions\PermissionLoader;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -37,6 +39,18 @@ trait InteractsWithAuthGroups
     public function ownedAuthGroups(): HasMany
     {
         return $this->hasMany(config('permissions.models.auth_group'), 'owner_id');
+    }
+
+    /**
+     * @param $authGroup
+     * @return AuthGroupUser
+     * @throws \Denismitr\Permissions\Exceptions\AuthGroupUserNotFound
+     */
+    public function onAuthGroup($authGroup): AuthGroupUser
+    {
+        $authGroup = $this->getAuthGroup($authGroup);
+
+        return AuthGroupUser::findByAuthGroupAndUser($authGroup->id, $this->id);
     }
 
     /*
@@ -89,7 +103,7 @@ trait InteractsWithAuthGroups
 
         $this->authGroups()->saveMany($groups->all());
 
-        $this->forgetCachedPermissions();
+        app(PermissionLoader::class)->forgetCachedPermissions();
 
         return $this;
     }
@@ -351,11 +365,11 @@ trait InteractsWithAuthGroups
     public function getAuthGroup($group): AuthGroup
     {
         if (is_numeric($group)) {
-            return app(AuthGroup::class)->findById($group);
+            return app(config('permissions.models.auth_group'))->findById($group);
         }
 
         if (is_string($group)) {
-            return app(AuthGroup::class)->findByName($group, $this->getDefaultGuard());
+            return app(config('permissions.models.auth_group'))->findByName($group);
         }
 
         return $group;

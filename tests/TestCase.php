@@ -61,6 +61,11 @@ abstract class TestCase extends OrchestraTestCase
      */
     protected $adminsGroup;
 
+    /**
+     * @var Permission
+     */
+    protected $blogAdminPermission;
+
 
     public function setUp()
     {
@@ -113,7 +118,8 @@ abstract class TestCase extends OrchestraTestCase
         $this->editArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles']);
         $this->editNewsPermission = $app[Permission::class]->create(['name' => 'edit-news']);
         $this->editBlogPermission = $app[Permission::class]->create(['name' => 'edit-blog']);
-        $this->adminPermission = $app[Permission::class]->create(['name' => 'admin-actions']);
+        $this->adminPermission = $app[Permission::class]->create(['name' => 'administrate-website']);
+        $this->blogAdminPermission = $app[Permission::class]->create(['name' => 'administrate-blog']);
     }
 
     /**

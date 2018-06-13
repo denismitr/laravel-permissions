@@ -2,7 +2,6 @@
 
 namespace Denismitr\Permissions\Models;
 
-use Denismitr\Permissions\Contracts\UserPermission;
 use Denismitr\Permissions\Exceptions\PermissionAlreadyExists;
 use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
 use Denismitr\Permissions\PermissionLoader;
@@ -10,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
 
-class Permission extends Model implements UserPermission
+class Permission extends Model
 {
     protected $guarded = ['id'];
 
@@ -34,10 +33,10 @@ class Permission extends Model implements UserPermission
 
     /**
      * @param int $id
-     * @return UserPermission
+     * @return Permission
      * @throws PermissionDoesNotExist
      */
-    public static function findById(int $id): UserPermission
+    public static function findById(int $id): self
     {
         $permission = static::getPermissions()->where('id', $id)->first();
 
@@ -51,10 +50,10 @@ class Permission extends Model implements UserPermission
 
     /**
      * @param string $name
-     * @return UserPermission
+     * @return Permission
      * @throws PermissionDoesNotExist
      */
-    public static function findByName(string $name): UserPermission
+    public static function findByName(string $name): self
     {
         $permission = static::find($name);
 
@@ -67,9 +66,9 @@ class Permission extends Model implements UserPermission
 
     /**
      * @param string $name
-     * @return UserPermission
+     * @return Permission
      */
-    public static function findOrCreate(string $name): UserPermission
+    public static function findOrCreate(string $name): self
     {
         $permission = static::find($name);
 
@@ -99,11 +98,13 @@ class Permission extends Model implements UserPermission
     /**
      * @return BelongsToMany
      */
-    public function users(): BelongsToMany
+    public function authGroupUsers(): BelongsToMany
     {
         return $this->belongsToMany(
-            config('permissions.models.user'),
-            'user_permissions'
+            AuthGroupUser::class,
+            'auth_group_user_permissions',
+            'permission_id',
+            'auth_group_user_id'
         );
     }
 
@@ -133,5 +134,12 @@ class Permission extends Model implements UserPermission
         })->first();
 
         return $permission;
+    }
+
+    public function isGrantedFor($user)
+    {
+        $this->load('authGroupUsers');
+
+        return $this->authGroupUsers->contains('user_id', $user->id);
     }
 }
