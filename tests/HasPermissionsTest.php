@@ -11,13 +11,17 @@ use Denismitr\Permissions\Test\Models\User;
 class HasPermissionsTest extends TestCase
 {
     /** @test */
-    public function it_can_assign_a_permission_to_a_user()
+    public function it_can_assign_a_permission_to_a_user_via_auth_group_and_check_it()
     {
-        $this->user->givePermissionTo($this->editArticlesPermission);
+        $this->usersGroup->addUser($this->user);
+
+        $this->user->grantPermissionsOnAuthGroup('users', $this->editArticlesPermission);
 
         $this->refreshUser();
 
         $this->assertTrue($this->user->hasPermissionTo($this->editArticlesPermission));
+        $this->assertFalse($this->user->hasPermissionTo($this->adminPermission));
+        $this->assertFalse($this->user->hasPermissionTo($this->editBlogPermission));
     }
 
     /** @test */

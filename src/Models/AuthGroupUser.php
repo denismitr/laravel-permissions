@@ -56,14 +56,17 @@ class AuthGroupUser extends Model
     }
 
     /**
-     * @param int $authGroupId
-     * @param int $userId
+     * @param $authGroup
+     * @param $user
      * @return AuthGroupUser
      * @throws AuthGroupUserNotFound
+     * @throws \Denismitr\Permissions\Exceptions\AuthGroupDoesNotExist
      */
-    public static function findByAuthGroupAndUser(int $authGroupId, int $userId): self
+    public static function findByAuthGroupAndUser($authGroup, $user): self
     {
-        $found = static::where('auth_group_id', $authGroupId)->where('user_id', $userId)->first();
+        $authGroupId = is_numeric($authGroup) ? $authGroup : AuthGroup::find($authGroup)->id;
+
+        $found = static::where('auth_group_id', $authGroupId)->where('user_id', $user->id)->first();
 
         if ( ! $found) {
             throw new AuthGroupUserNotFound();

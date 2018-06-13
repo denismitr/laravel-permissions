@@ -112,6 +112,28 @@ class AuthGroup extends Model implements UserRole
     }
 
     /**
+     * @param $authGroup
+     * @return AuthGroup
+     * @throws AuthGroupDoesNotExist
+     */
+    public static function find($authGroup)
+    {
+        if ( is_numeric($authGroup) ) {
+            return static::findById($authGroup);
+        }
+
+        if (is_string($authGroup)) {
+            return static::findByName($authGroup);
+        }
+
+        if ($authGroup instanceof AuthGroup) {
+            return $authGroup;
+        }
+
+        throw new AuthGroupDoesNotExist();
+    }
+
+    /**
      * @param string $name
      * @param null $guard
      * @return UserRole

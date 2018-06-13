@@ -42,15 +42,22 @@ trait InteractsWithAuthGroups
     }
 
     /**
+     * @return mixed
+     */
+    public function authGroupUsers()
+    {
+        return $this->hasMany(AuthGroupUser::class, 'user_id');
+    }
+
+    /**
      * @param $authGroup
      * @return AuthGroupUser
+     * @throws \Denismitr\Permissions\Exceptions\AuthGroupDoesNotExist
      * @throws \Denismitr\Permissions\Exceptions\AuthGroupUserNotFound
      */
     public function onAuthGroup($authGroup): AuthGroupUser
     {
-        $authGroup = $this->getAuthGroup($authGroup);
-
-        return AuthGroupUser::findByAuthGroupAndUser($authGroup->id, $this->id);
+        return AuthGroupUser::findByAuthGroupAndUser($authGroup, $this);
     }
 
     /*
@@ -78,6 +85,15 @@ trait InteractsWithAuthGroups
         }
 
         throw new UserCannotOwnAuthGroups;
+    }
+
+
+    public function grantPermissionsOnAuthGroup($authGroup, ...$permissions)
+    {
+        /** @var AuthGroupUser $authGroupUser */
+        $authGroupUser = AuthGroupUser::findByAuthGroupAndUser($authGroup, $this);
+
+        $authGroupUser->grantPermissionTo(...$permissions);
     }
 
     public function switchToAuthGroup(AuthGroup $authGroup): AuthGroup
@@ -170,9 +186,9 @@ trait InteractsWithAuthGroups
      * @param $permission
      * @return bool
      */
-    public function hasPermissionThroughAuthGroup($permission): bool
+    public function hasPermissionThroughAuthGroup(Permission $permission): bool
     {
-        return $this->isOneOf($permission->groups);
+        return $this->isOneOf($permission->groups) || $permission->isGrantedFor($this);
     }
 
     /**
