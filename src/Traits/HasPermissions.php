@@ -32,6 +32,22 @@ trait HasPermissions
     }
 
     /**
+     * @param $permission
+     * @return $this
+     * @throws PermissionDoesNotExist
+     */
+    public function revokePermissionTo($permission)
+    {
+        $this->permissions()->detach($this->getPermission($permission));
+
+        app(PermissionLoader::class)->forgetCachedPermissions();
+
+        $this->load('permissions');
+
+        return $this;
+    }
+
+    /**
      * @param array ...$permissions
      * @return $this
      */

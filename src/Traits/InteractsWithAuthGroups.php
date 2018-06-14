@@ -9,6 +9,7 @@ use Denismitr\Permissions\Models\AuthGroup;
 use Denismitr\Permissions\Models\AuthGroupUser;
 use Denismitr\Permissions\Models\Permission;
 use Denismitr\Permissions\PermissionLoader;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -24,6 +25,51 @@ trait InteractsWithAuthGroups
             }
 
             $model->authGroups()->detach();
+        });
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * @param Builder $query
+     * @param $permissions
+     * @return Builder
+     */
+    public function scopeWithPermissions(Builder $query, $permissions): Builder
+    {
+        $permissions = $this->resolvePermissions($permissions);
+
+        $rolesWithPermissions = $permissions->map(function($permission) {
+            return $permission->groups->all();
+        })->flatten()->unique();
+
+        return $query->where(function ($query) use ($permissions, $rolesWithPermissions) {
+            $query->whereHas('authGroupUsers.permissions', function ($query) use ($permissions) {
+
+                foreach ($permissions as $permission) {
+                    $query->where(
+                        config('permissions.tables.permissions').'.id',
+                        $permission->id
+                    );
+                }
+            });
+
+            if ($rolesWithPermissions->count() > 0) {
+                $query->orWhereHas('authGroups', function ($query) use ($rolesWithPermissions) {
+                    $query->where(function ($query) use ($rolesWithPermissions) {
+                        foreach ($rolesWithPermissions as $role) {
+                            $query->orWhere(
+                                config('permissions.tables.auth_groups').'.id',
+                                $role->id
+                            );
+                        }
+                    });
+                });
+            }
         });
     }
 
@@ -87,13 +133,33 @@ trait InteractsWithAuthGroups
         throw new UserCannotOwnAuthGroups;
     }
 
-
+    /**
+     * @param $authGroup
+     * @param array ...$permissions
+     * @throws \Denismitr\Permissions\Exceptions\AuthGroupDoesNotExist
+     * @throws \Denismitr\Permissions\Exceptions\AuthGroupUserNotFound
+     */
     public function grantPermissionsOnAuthGroup($authGroup, ...$permissions)
     {
         /** @var AuthGroupUser $authGroupUser */
         $authGroupUser = AuthGroupUser::findByAuthGroupAndUser($authGroup, $this);
 
         $authGroupUser->grantPermissionTo(...$permissions);
+    }
+
+    /**
+     * @param $authGroup
+     * @param $permission
+     * @throws \Denismitr\Permissions\Exceptions\AuthGroupDoesNotExist
+     * @throws \Denismitr\Permissions\Exceptions\AuthGroupUserNotFound
+     * @throws \Denismitr\Permissions\Exceptions\PermissionDoesNotExist
+     */
+    public function revokePermissionOnAuthGroup($authGroup, $permission)
+    {
+        /** @var AuthGroupUser $authGroupUser */
+        $authGroupUser = AuthGroupUser::findByAuthGroupAndUser($authGroup, $this);
+
+        $authGroupUser->revokePermissionTo($permission);
     }
 
     public function switchToAuthGroup(AuthGroup $authGroup): AuthGroup
@@ -412,5 +478,26 @@ trait InteractsWithAuthGroups
         }
 
         return explode('|', trim($pipeString, $quoteCharacter));
+    }
+
+    /**
+     * @param $permissions
+     * @return Collection
+     */
+    protected function resolvePermissions($permissions): Collection
+    {
+        if ($permissions instanceof Collection) {
+            return $permissions;
+        }
+
+        $permissions = collect($permissions);
+
+        return $permissions->map(function($permission) {
+            if ($permission instanceof Permission) {
+                return $permission;
+            }
+
+            return Permission::findByName($permission);
+        });
     }
 }
