@@ -53,4 +53,13 @@ class SwitchToAuthGroupTest extends TestCase
             'current_auth_group_id' => $authGroupB->id
         ]);
     }
+
+    /** @test */
+    public function current_auth_group_can_be_nullable()
+    {
+        // Given
+        $user = User::create(['email' => 'new@user.com']);
+
+        $this->assertNull($user->currentAuthGroup());
+    }
 }

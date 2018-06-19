@@ -369,7 +369,7 @@ trait InteractsWithAuthGroups
      *
      * @return AuthGroup
      */
-    public function currentAuthGroup(): AuthGroup
+    public function currentAuthGroup(): ?AuthGroup
     {
         if ( is_null($this->current_auth_group_id) && $this->belongsToAnyAuthGroup() ) {
             $this->switchToAuthGroup($this->authGroups()->first());
@@ -380,6 +380,8 @@ trait InteractsWithAuthGroups
 
             return $currentAuthGroup ?: $this->refreshCurrentAuthGroup();
         }
+
+        return null;
     }
 
     /*
