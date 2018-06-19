@@ -1,8 +1,8 @@
-## Version 1.* is abandoned. Version 2 is coming
+## Version 2.0
 
 ## Laravel Permissions
 
-This is a package to integrate with Laravel 5.*
+This is a package to integrate with Laravel 5.5 - 5.6
 
 ## Installation
 
@@ -112,11 +112,40 @@ $user->can('delete post');
 
 Attention!!! for compatibility reasons the ```can``` method can support only single ability argument
 
+### Current AuthGroup
 
-Plus a bonus a __blade__ `team` directive:
+User can have a current auth group, via a `current_auth_group_id` column that is being added to the `users`
+table by the package migrations. This feature can be used to emulate switching between **teams** for example.
+
+```php
+// Given
+$user = User::create(['email' => 'new@user.com']);
+$authGroupA = AuthGroup::create(['name' => 'Auth group A']);
+$authGroupB = AuthGroup::create(['name' => 'Auth group B']);
+
+// Do that
+$user->joinAuthGroup($authGroupA);
+$user->joinAuthGroup($authGroupB);
+
+// Expect user is on two authGroups
+$user->isOneOf($authGroupA); // true
+$user->isOneOf($authGroupB); // true
+
+// Do switch to authGroupB
+$user->switchToAuthGroup($authGroupB);
+
+// currentAuthGroup() method returns a current AuthGroup model or null in case user is
+// not a member of any group
+// currentAuthGroupName() works in the same way and can be used to display current team or group name
+$user->currentAuthGroup(); // $authGroupB
+$user->currentAuthGroupName(); // Auth group B
+```
+
+Note that in case user belongs to one or more **auth groups** the `currentAuthGroup()` method will automatically choose and set one of the users auth group as current, persist it on `User` model via `current_auth_group_id` column and return it. The same applies to `currentAuthGroupName()`.
+
+Plus a bonus a __blade__ `auth_group` and `team` directives:
 
 
 ### Author
-
 Denis Mitrofanov
 [TheCollection.ru](https://thecollection.ru)
