@@ -12,7 +12,7 @@ Require this package with composer:
 composer require denismitr/laravel-permissions
 ```
 
-After updating composer, add the ServiceProvider to the providers array in config/app.php like so:
+After updating composer, add the `PermissionsServiceProvider` to the providers array in `config/app.php` like so:
 
 ```php
 Denismitr\Permissions\PermissionsServiceProvider::class,
@@ -24,12 +24,12 @@ Then if you need to use middleware, you can add a `auth.group` middleware to you
 'auth.group' => \Denismitr\Permissions\Middleware\AuthGroupMiddleware::class,
 ```
 
-You can utilize an Interface
-```php
-
-```
-
 Then run `php artisan migrate` and the following _5_ tables will be created:
+* auth_groups
+* permissions
+* user_permissions
+* auth_group_users
+* auth_group_permissions
 
 
 
@@ -143,8 +143,18 @@ $user->currentAuthGroupName(); // Auth group B
 
 Note that in case user belongs to one or more **auth groups** the `currentAuthGroup()` method will automatically choose and set one of the users auth group as current, persist it on `User` model via `current_auth_group_id` column and return it. The same applies to `currentAuthGroupName()`.
 
-Plus a bonus a __blade__ `auth_group` and `team` directives:
-
+Plus a bonus a __blade__ `authgroup` and `team` directives:
+```php
+@authgroup('staff')
+// do stuff
+@endauthgroup
+```
+And it's alias
+```php
+@team('some team')
+// do stuff
+@endteam
+```
 
 ### Author
 Denis Mitrofanov
