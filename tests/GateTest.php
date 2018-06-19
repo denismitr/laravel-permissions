@@ -27,18 +27,6 @@ class GateTest extends TestCase
     }
 
     /** @test */
-    public function it_can_determine_if_a_user_has_a_direct_permission()
-    {
-        $this->user->givePermissionTo('edit-articles');
-
-        $this->assertTrue($this->user->can('edit-articles'));
-
-        $this->assertFalse($this->user->can('non-existing-permission'));
-
-        $this->assertFalse($this->user->can('admin-permission'));
-    }
-
-    /** @test */
     public function it_can_determine_if_a_user_has_a_permission_through_groups()
     {
         $this->usersGroup->givePermissionTo($this->editArticlesPermission);

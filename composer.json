@@ -11,6 +11,7 @@
             "role": "Developer"
         }
     ],
+    "bin": ["bin/phpunit"],
     "autoload": {
         "psr-4": {
             "Denismitr\\Permissions\\": "src"

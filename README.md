@@ -18,10 +18,10 @@ After updating composer, add the ServiceProvider to the providers array in confi
 Denismitr\Permissions\PermissionsServiceProvider::class,
 ```
 
-Then if you need to use middleware, you can add a `role` middleware to your Http `Kernel.php` like so:
+Then if you need to use middleware, you can add a `auth.group` middleware to your Http `Kernel.php` like so:
 
 ```php
-
+'auth.group' => \Denismitr\Permissions\Middleware\AuthGroupMiddleware::class,
 ```
 
 You can utilize an Interface
@@ -29,7 +29,7 @@ You can utilize an Interface
 
 ```
 
-Then run `php artisan migrate` and the following _5_ migrations will be created:
+Then run `php artisan migrate` and the following _5_ tables will be created:
 
 
 
@@ -55,9 +55,12 @@ AuthGroup::named('superusers')->addUser($userA)->addUser($userB);
 $userA->isOneOf('superusers'); //true
 $userB->isOneOf('superusers'); // true
 
+// Gives permission to the choosen group
 AuthGroup::named('superusers')->givePermissionTo($editArticlesPermission);
 AuthGroup::named('superusers')->givePermissionTo($editBlogPermission);
 
+// These methods check if user has a permission through any auth group,
+// to which user belongs
 $userA->hasPermissionTo('edit-articles'); // true
 $userA->isAllowedTo('edit-blog'); // true
 
@@ -66,9 +69,10 @@ $userB->isAllowedTo('edit-articles'); // true
 ```
 
 User can create personal or team auth group. Note that there is a `canOwnAuthGroups` method on
-`InteractsWithAuthGroups` trait that always returns `true`. If you want to define some custom rules on
-whether this or that user is allowed to create auth groups/teams, which you probably do, you need to 
-override that method in your user model. 
+`InteractsWithAuthGroups` trait that returns `true` by default. If you want to define some custom rules on
+whether this or that user is allowed to create auth groups, which you probably do, you need to 
+override that method in your user model.
+ 
 ```php
 $authGroup = $this->owner->createNewAuthGroup([
     'name' => 'Acme',
