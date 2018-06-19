@@ -27,11 +27,11 @@ class PermissionsServiceProvider extends ServiceProvider
 		
 		
 		try {			
-//			Permission::get()->map(function ($permission) {
-//				Gate::define($permission->name, function ($user) use ($permission) {
-//					return $user->hasPermissionTo($permission);
-//				});
-//			});
+			Permission::get()->map(function ($permission) {
+				Gate::define($permission->name, function ($user) use ($permission) {
+					return $user->hasPermissionTo($permission);
+				});
+			});
 		} catch(\Throwable $t) {}
 
 
@@ -57,11 +57,19 @@ class PermissionsServiceProvider extends ServiceProvider
 
     protected function registerBladeDirectives()
     {
-        Blade::directive('role', function($role) {
-            return "<?php if(auth()->check() && auth()->user()->hasRole({$role})): ?>";
+        Blade::directive('authgroup', function($group) {
+            return "<?php if(auth()->check() && auth()->user()->isOneOf({$group})): ?>";
         });
 
-        Blade::directive('endrole', function() {
+        Blade::directive('endauthgroup', function() {
+            return "<?php endif; ?>";
+        });
+
+        Blade::directive('team', function($group) {
+            return "<?php if(auth()->check() && auth()->user()->isOneOf({$group})): ?>";
+        });
+
+        Blade::directive('endteam', function() {
             return "<?php endif; ?>";
         });
     }
