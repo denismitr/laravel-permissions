@@ -44,6 +44,8 @@ class BladeDirectivesTest extends TestCase
         $this->assertEquals('does not belong to auth group', $this->renderView('authgroup', ['group' => 'admins']));
         $this->assertEquals('does not belong to auth group', $this->renderView('isoneof', ['group' => 'users']));
         $this->assertEquals('does not belong to team', $this->renderView('team', ['group' => 'writers']));
+        $this->assertEquals('does not belong to any of the auth groups', $this->renderView('isoneofany', ['group' => 'admins,users']));
+        $this->assertEquals('does not belong to all of the auth groups', $this->renderView('isoneofall', ['group' => ['admins','users']]));
     }
 
     protected function renderView(string $view, array $parameters)
