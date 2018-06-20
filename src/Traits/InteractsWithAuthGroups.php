@@ -263,7 +263,16 @@ trait InteractsWithAuthGroups
      */
     public function isOneOf($groups): bool
     {
-        if (is_string($groups) && false !== strpos($groups, '|')) {
+        return $this->isOneOfAny($groups);
+    }
+
+    /**
+     * @param $groups
+     * @return bool
+     */
+    public function isOneOfAny($groups): bool
+    {
+        if (is_string($groups) && (false !== strpos($groups, '|') || false !== strpos($groups, ','))) {
             $groups = $this->convertPipeToArray($groups);
         }
 
@@ -281,6 +290,7 @@ trait InteractsWithAuthGroups
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -461,7 +471,7 @@ trait InteractsWithAuthGroups
 
     protected function convertPipeToArray(string $pipeString)
     {
-        $pipeString = trim($pipeString);
+        $pipeString = str_replace(',', '|', trim($pipeString));
 
         if (strlen($pipeString) <= 2) {
             return $pipeString;
