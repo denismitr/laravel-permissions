@@ -31,8 +31,6 @@ Then run `php artisan migrate` and the following _5_ tables will be created:
 * auth_group_users
 * auth_group_permissions
 
-
-
 Creating the __CRUD__ and populating these tables is up to you.
 
 ## Usage
