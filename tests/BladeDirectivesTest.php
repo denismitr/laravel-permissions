@@ -10,7 +10,7 @@ use Denismitr\Permissions\Exceptions\AuthGroupAlreadyExists;
 use Denismitr\Permissions\Exceptions\AuthGroupDoesNotExist;
 use Denismitr\Permissions\Models\Permission;
 use Denismitr\Permissions\Models\AuthGroup;
-use Denismitr\Permissions\Test\Models\Admin;
+use Denismitr\Permissions\Test\Models\users;
 use Denismitr\Permissions\Test\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\View;
@@ -41,6 +41,9 @@ class BladeDirectivesTest extends TestCase
         $permission = 'update-something';
         
         $this->assertEquals('does not have permission', $this->renderView('can', ['permission' => $permission]));
+        $this->assertEquals('does not belong to auth group', $this->renderView('authgroup', ['group' => 'admins']));
+        $this->assertEquals('does not belong to auth group', $this->renderView('isoneof', ['group' => 'users']));
+        $this->assertEquals('does not belong to team', $this->renderView('team', ['group' => 'writers']));
     }
 
     protected function renderView(string $view, array $parameters)

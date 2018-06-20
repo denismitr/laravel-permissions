@@ -65,6 +65,14 @@ class PermissionsServiceProvider extends ServiceProvider
             return "<?php endif; ?>";
         });
 
+        Blade::directive('isoneof', function($group) {
+            return "<?php if(auth()->check() && auth()->user()->isOneOf({$group})): ?>";
+        });
+
+        Blade::directive('endisoneof', function() {
+            return "<?php endif; ?>";
+        });
+
         Blade::directive('team', function($group) {
             return "<?php if(auth()->check() && auth()->user()->isOneOf({$group})): ?>";
         });
