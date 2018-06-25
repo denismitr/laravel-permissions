@@ -22,6 +22,7 @@ Then if you need to use one of the provided middleware, you can add a `auth.grou
 
 ```php
 'auth.group.all' => \Denismitr\Permissions\Middleware\AuthGroupAllMiddleware::class,
+'auth.group.any' => \Denismitr\Permissions\Middleware\AuthGroupAnyMiddleware::class,
 ```
 This one insures that user belongs to all required auth groups
 
