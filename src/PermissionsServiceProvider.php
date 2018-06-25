@@ -12,11 +12,18 @@ class PermissionsServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application services.
      *
+     * @param PermissionLoader $permissionLoader
      * @return void
      */
-    public function boot(\Illuminate\Routing\Router $router)
+    public function boot(PermissionLoader $permissionLoader)
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../migrations');
+        if ( ! is_lumen()) {
+            $this->publishes([
+                __DIR__.'/../config/permissions.php' => config_path('permissions.php'),
+            ], 'config');
+
+            $this->publishMigrations();
+        }
 		
 		
 		try {			
@@ -27,13 +34,8 @@ class PermissionsServiceProvider extends ServiceProvider
 			});
 		} catch(\Throwable $t) {}
 
-        Blade::directive('role', function($role) {
-            return "<?php if(auth()->check() && auth()->user()->hasRole({$role})): ?>";
-        });
 
-        Blade::directive('endrole', function() {
-            return "<?php endif; ?>";
-        });
+        $permissionLoader->registerPermissions();
     }
 
     /**
@@ -43,6 +45,66 @@ class PermissionsServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        if ( ! is_lumen()) {
+            $this->mergeConfigFrom(
+                __DIR__ . './../config/permissions.php',
+                'permissions'
+            );
+        }
 
+        $this->registerBladeDirectives();
+    }
+
+    protected function registerBladeDirectives()
+    {
+        Blade::directive('authgroup', function($group) {
+            return "<?php if(auth()->check() && auth()->user()->isOneOf({$group})): ?>";
+        });
+
+        Blade::directive('endauthgroup', function() {
+            return "<?php endif; ?>";
+        });
+
+        Blade::directive('isoneof', function($group) {
+            return "<?php if(auth()->check() && auth()->user()->isOneOf({$group})): ?>";
+        });
+
+        Blade::directive('endisoneof', function() {
+            return "<?php endif; ?>";
+        });
+
+        Blade::directive('isoneofany', function($group) {
+            return "<?php if(auth()->check() && auth()->user()->isOneOfAny({$group})): ?>";
+        });
+
+        Blade::directive('endisoneofany', function() {
+            return "<?php endif; ?>";
+        });
+
+        Blade::directive('isoneofall', function($group) {
+            return "<?php if(auth()->check() && auth()->user()->isOneOfAll({$group})): ?>";
+        });
+
+        Blade::directive('endisoneofall', function() {
+            return "<?php endif; ?>";
+        });
+
+        Blade::directive('team', function($group) {
+            return "<?php if(auth()->check() && auth()->user()->isOneOf({$group})): ?>";
+        });
+
+        Blade::directive('endteam', function() {
+            return "<?php endif; ?>";
+        });
+    }
+
+    protected function publishMigrations()
+    {
+        $timestamp = date('Y_m_d_His', time());
+
+        $this->publishes([
+            __DIR__ . './../migrations/create_laravel_permissions.php' =>
+                database_path("/migrations/{$timestamp}_create_laravel_permissions.php"),
+        ]);
     }
 }

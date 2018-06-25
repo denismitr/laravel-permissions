@@ -1,8 +1,8 @@
-## Version 1.* is abandoned. Version 2 is coming
+## Version 2.0 Alfa
 
 ## Laravel Permissions
 
-This is a package to integrate with Laravel 5.*
+This is a package to integrate with Laravel 5.5 - 5.6
 
 ## Installation
 
@@ -12,55 +12,98 @@ Require this package with composer:
 composer require denismitr/laravel-permissions
 ```
 
-After updating composer, add the ServiceProvider to the providers array in config/app.php like so:
+After updating composer, add the `PermissionsServiceProvider` to the providers array in `config/app.php` like so:
 
 ```php
 Denismitr\Permissions\PermissionsServiceProvider::class,
 ```
 
-Then if you need to use middleware, you can add a `role` middleware to your Http `Kernel.php` like so:
+Then if you need to use one of the provided middleware, you can add a `auth.group` middleware to your Http `Kernel.php` like so:
 
 ```php
-'role' => \Denismitr\Permissions\Middleware\RoleMiddleware::class
+'auth.group.all' => \Denismitr\Permissions\Middleware\AuthGroupAllMiddleware::class,
+'auth.group.any' => \Denismitr\Permissions\Middleware\AuthGroupAnyMiddleware::class,
 ```
+This one insures that user belongs to all required auth groups
 
-You can utilize an Interface
-```php
-Denismitr\Permissions\Contracts\RolesAndPermissionsInterface::class
-```
+### Migration
 
 Then run `php artisan migrate` and the following _5_ tables will be created:
-
+* auth_groups
 * permissions
-* roles
-* roles_permissions
-* users_permissions
-* users_roles
+* user_permissions
+* auth_group_users
+* auth_group_permissions
 
-Creating the __CRUD__ and populating thoses tables is up to you.
+Creating the __CRUD__ and populating these tables is up to you.
 
 ## Usage
 
-First include `HasPermissionsTrait` trait into the `User` model like so:
+First include `InteractsWithAuthGroups` trait into the `User` model like so:
 
 ```php
-use ..., HasRolesAndPermissions;
+use InteractsWithAuthGroups;
 ```
 
-To give permissions to a user:
+To add users to an AuthGroup and give them group permissions:
 
 ```php
-$user->givePermissionTo('add post', 'edit post');
+// Given we have
+AuthGroup::create(['name' => 'superusers']);
+
+// To find an auth group by name
+AuthGroup::named('superusers')->addUser($userA)->addUser($userB);
+
+$userA->isOneOf('superusers'); //true
+$userB->isOneOf('superusers'); // true
+
+// Gives permission to the choosen group
+AuthGroup::named('superusers')->givePermissionTo($editArticlesPermission);
+AuthGroup::named('superusers')->givePermissionTo($editBlogPermission);
+
+// These methods check if user has a permission through any auth group,
+// to which user belongs
+$userA->hasPermissionTo('edit-articles'); // true
+$userA->isAllowedTo('edit-blog'); // true
+
+$userB->hasPermissionTo('edit-blog'); // true
+$userB->isAllowedTo('edit-articles'); // true
+```
+
+User can create personal or team auth group. Note that there is a `canOwnAuthGroups` method on
+`InteractsWithAuthGroups` trait that returns `true` by default. If you want to define some custom rules on
+whether this or that user is allowed to create auth groups, which you probably do, you need to 
+override that method in your user model.
+ 
+```php
+$authGroup = $this->owner->createNewAuthGroup([
+    'name' => 'Acme',
+    'description' => 'My company auth group',
+]);
+
+$authGroup
+    ->addUser($this->userA)
+    ->addUser($this->userB);
 ```
 
 To withdraw permissions
 ```php
-$user->withdrawPermissionTo('delete post', 'edit post');
+$authGroup->revokePermissionTo('delete post', 'edit post');
 ```
 
-To check for a role:
+Grant permission through auth group:
 ```php
-$user->hasRole('admin');
+$admin->joinAuthGroup('admins'); // group must already exist
+
+$admin->onAuthGroup('admins')->grantPermissionTo('administrate-blog'); // permission must already exist
+// same as
+$admin->onAuthGroup('admins')->allowTo('administrate-blog'); // permission must already exist
+// or
+$admin->onAuthGroup('admins')->givePermissionTo('administrate-blog');
+
+// later
+
+$blogAdminPermission->isGrantedFor($this->admin);
 ```
 
 To check for permissions:
@@ -71,23 +114,67 @@ $user->can('delete post');
 
 Attention!!! for compatibility reasons the ```can``` method can support only single ability argument
 
-Create roles:
+### Current AuthGroup
+
+User can have a current auth group, via a `current_auth_group_id` column that is being added to the `users`
+table by the package migrations. This feature can be used to emulate switching between **teams** for example.
+
 ```php
-$adminRole = Role::fromName('admin');
-$adminRole->givePermissionTo('add post', 'delete post');
+// Given
+$user = User::create(['email' => 'new@user.com']);
+$authGroupA = AuthGroup::create(['name' => 'Auth group A']);
+$authGroupB = AuthGroup::create(['name' => 'Auth group B']);
+
+// Do that
+$user->joinAuthGroup($authGroupA);
+$user->joinAuthGroup($authGroupB);
+
+// Expect user is on two authGroups
+$user->isOneOf($authGroupA); // true
+$user->isOneOf($authGroupB); // true
+
+// Do switch to authGroupB
+$user->switchToAuthGroup($authGroupB);
+
+// currentAuthGroup() method returns a current AuthGroup model or null in case user is
+// not a member of any group
+// currentAuthGroupName() works in the same way and can be used to display current team or group name
+$user->currentAuthGroup(); // $authGroupB
+$user->currentAuthGroupName(); // Auth group B
 ```
 
-You can specify any names of the roles and permissions.
+Note that in case user belongs to one or more **auth groups** the `currentAuthGroup()` method will automatically choose and set one of the users auth group as current, persist it on `User` model via `current_auth_group_id` column and return it. The same applies to `currentAuthGroupName()`.
 
-Plus a bonus a __blade__ `role` directive:
+Plus a bonus a __blade__ `authgroup` and `team` directives:
+```php
+@authgroup('staff')
+// do stuff
+@endauthgroup
+```
+And it's alias
+```php
+@team('some team')
+// do stuff
+@endteam
+```
+
+Some other directives
+```php
+@isoneof('admins')
+...
+@endisoneof
+
+@isoneofany('writers|bloggers')
+...
+@endisoneofany
+```
 
 ```php
-@role('staff')
+@isoneofall('authors,writers,bloggers')
 ...
-@endrole
+@endisoneofall
 ```
 
 ### Author
-
 Denis Mitrofanov
 [TheCollection.ru](https://thecollection.ru)
