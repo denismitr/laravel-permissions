@@ -303,7 +303,7 @@ trait InteractsWithAuthGroups
      */
     public function isOneOfAll($groups): bool
     {
-        if (is_string($groups) && false !== strpos($groups, '|')) {
+        if ($this->isListOfGroups($groups)) {
             $groups = $this->convertPipeToArray($groups);
         }
 
@@ -511,5 +511,15 @@ trait InteractsWithAuthGroups
 
             return Permission::findByName($permission);
         });
+    }
+
+    /**
+     * @param $groups
+     * @return bool
+     */
+    public function isListOfGroups($groups): bool
+    {
+        return is_string($groups) &&
+            (false !== strpos($groups, '|') || false !== strpos($groups, ','));
     }
 }

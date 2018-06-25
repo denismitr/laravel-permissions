@@ -54,11 +54,6 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * @var AuthGroup
      */
-    protected $staffGroup;
-
-    /**
-     * @var AuthGroup
-     */
     protected $adminsGroup;
 
     /**
@@ -112,7 +107,6 @@ abstract class TestCase extends OrchestraTestCase
         $this->admin = User::create(['email' => 'admin@test.com']);
 
         $this->usersGroup = $app[AuthGroup::class]->create(['name' => 'users']);
-        $this->staffGroup = $app[AuthGroup::class]->create(['name' => 'staff']);
         $this->adminsGroup = $app[AuthGroup::class]->create(['name' => 'admins']);
 
         $this->editArticlesPermission = $app[Permission::class]->create(['name' => 'edit-articles']);

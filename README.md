@@ -18,11 +18,14 @@ After updating composer, add the `PermissionsServiceProvider` to the providers a
 Denismitr\Permissions\PermissionsServiceProvider::class,
 ```
 
-Then if you need to use middleware, you can add a `auth.group` middleware to your Http `Kernel.php` like so:
+Then if you need to use one of the provided middleware, you can add a `auth.group` middleware to your Http `Kernel.php` like so:
 
 ```php
-'auth.group' => \Denismitr\Permissions\Middleware\AuthGroupMiddleware::class,
+'auth.group.all' => \Denismitr\Permissions\Middleware\AuthGroupAllMiddleware::class,
 ```
+This one insures that user belongs to all required auth groups
+
+### Migration
 
 Then run `php artisan migrate` and the following _5_ tables will be created:
 * auth_groups
