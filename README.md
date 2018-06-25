@@ -154,6 +154,23 @@ And it's alias
 @endteam
 ```
 
+Some other directives
+```php
+@isoneof('admins')
+...
+@endisoneof
+
+@isoneofany('writers|bloggers')
+...
+@endisoneofany
+```
+
+```php
+@isoneofall('authors,writers,bloggers')
+...
+@endisoneofall
+```
+
 ### Author
 Denis Mitrofanov
 [TheCollection.ru](https://thecollection.ru)

@@ -20,7 +20,7 @@ class CreateLaravelPermissions extends Migration
             $table->unsignedInteger('owner_id')->nullable();
             $table->timestamps();
 
-            $table->unique(['name', 'owner_id']);
+            $table->unique('name');
         });
 
         Schema::create('permissions', function (Blueprint $table) {

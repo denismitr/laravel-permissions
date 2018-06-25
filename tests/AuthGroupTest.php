@@ -37,6 +37,16 @@ class AuthGroupTest extends TestCase
         $this->assertFalse($authGroup->isTeam());
     }
 
+    /** @test */
+    public function auth_group_name_must_be_unique()
+    {
+        $authGroup = AuthGroup::create(['name' => 'New auth group']);
+
+        $this->expectException(AuthGroupAlreadyExists::class);
+
+        $authGroup = AuthGroup::create(['name' => 'New auth group']);
+    }
+
     /**
      * @test
      * @throws AuthGroupAlreadyExists
