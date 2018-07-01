@@ -109,4 +109,19 @@ class AuthGroupsOwnershipTest extends TestCase
         $this->assertFalse($this->userB->hasPermissionTo('edit-blog'));
         $this->assertFalse($this->userB->isAllowedTo('edit-articles'));
     }
+
+    /** @test */
+    public function owner_can_grand_permissions_for_each_user_on_the_private_group()
+    {
+        // Given we have a private auth group
+        $authGroup = $this->owner->createNewAuthGroup('Acme','My company auth group');
+
+        // Do invite users to the group
+        $authGroup
+            ->addUser($this->userA, 'specialist')
+            ->addUser($this->userB, 'useless worker');
+
+        $authGroup->forUser($this->userA)->allowTo('edit-articles');
+        $this->assertTrue($this->userA->isAllowedTo('edit-articles'));
+    }
 }
