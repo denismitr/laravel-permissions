@@ -123,5 +123,8 @@ class AuthGroupsOwnershipTest extends TestCase
 
         $authGroup->forUser($this->userA)->allowTo('edit-articles');
         $this->assertTrue($this->userA->isAllowedTo('edit-articles'));
+
+        $authGroup->forUser($this->userB)->grantPermissionTo('edit-blog');
+        $this->assertTrue($this->userB->can('edit-blog'));
     }
 }
