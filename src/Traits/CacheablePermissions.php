@@ -4,18 +4,18 @@
 namespace Denismitr\Permissions\Traits;
 
 
-use Denismitr\Permissions\PermissionLoader;
+use Denismitr\Permissions\Loader;
 
 trait CacheablePermissions
 {
     public static function bootCacheablePermissions()
     {
         static::saved(function () {
-            app(PermissionLoader::class)->forgetCachedPermissions();
+            app(Loader::class)->forgetCachedPermissions();
         });
 
         static::deleted(function () {
-            app(PermissionLoader::class)->forgetCachedPermissions();
+            app(Loader::class)->forgetCachedPermissions();
         });
     }
 }

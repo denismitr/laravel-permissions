@@ -43,10 +43,7 @@ class AuthGroupsOwnershipTest extends TestCase
      */
     public function user_can_create_a_personal_auth_group()
     {
-        $authGroup = $this->owner->createNewAuthGroup([
-            'name' => 'Acme',
-            'description' => 'My company auth group',
-        ]);
+        $authGroup = $this->owner->createNewAuthGroup('Acme','My company auth group');
 
         $authGroup
             ->addUser($this->userA)

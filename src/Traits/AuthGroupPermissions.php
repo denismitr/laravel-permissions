@@ -7,7 +7,7 @@ namespace Denismitr\Permissions\Traits;
 use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
 use Denismitr\Permissions\Models\AuthGroup;
 use Denismitr\Permissions\Models\Permission;
-use Denismitr\Permissions\PermissionLoader;
+use Denismitr\Permissions\Loader;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
@@ -250,6 +250,6 @@ trait AuthGroupPermissions
      */
     public function forgetCachedPermissions()
     {
-        app(PermissionLoader::class)->forgetCachedPermissions();
+        app(Loader::class)->forgetCachedPermissions();
     }
 }

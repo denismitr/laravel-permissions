@@ -8,7 +8,7 @@ use Denismitr\Permissions\Exceptions\UserCannotOwnAuthGroups;
 use Denismitr\Permissions\Models\AuthGroup;
 use Denismitr\Permissions\Models\AuthGroupUser;
 use Denismitr\Permissions\Models\Permission;
-use Denismitr\Permissions\PermissionLoader;
+use Denismitr\Permissions\Loader;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -73,6 +73,30 @@ trait InteractsWithAuthGroups
         });
     }
 
+    /**
+     * @param Builder $query
+     * @param $permissions
+     * @return Builder
+     */
+    public function scopeAllowed(Builder $query, $permissions): Builder
+    {
+        return $this->withPermissions($permissions);
+    }
+
+    /**
+     * @param Builder $query
+     * @param $groups
+     * @return Builder
+     */
+    public function belongingTo(Builder $query, $groups): Builder
+    {
+        $groups = $this->convertToArray($groups);
+
+        return $query->whereHas('authGroups', function ($query) use ($groups) {
+            $query->whereIn('name', $groups);
+        });
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Relationships
@@ -84,7 +108,7 @@ trait InteractsWithAuthGroups
      */
     public function ownedAuthGroups(): HasMany
     {
-        return $this->hasMany(config('permissions.models.auth_group'), 'owner_id');
+        return $this->hasMany(AuthGroup::class, 'owner_id');
     }
 
     /**
@@ -93,6 +117,14 @@ trait InteractsWithAuthGroups
     public function authGroupUsers()
     {
         return $this->hasMany(AuthGroupUser::class, 'user_id');
+    }
+
+    /**
+     * @return MorphToMany
+     */
+    public function authGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(AuthGroup::class, 'auth_group_users');
     }
 
     /**
@@ -113,21 +145,26 @@ trait InteractsWithAuthGroups
     */
 
     /**
-     * @param array $attributes
+     * @param string $name
+     * @param string $description
      * @return AuthGroup
      * @throws UserCannotOwnAuthGroups
      * @throws \Denismitr\Permissions\Exceptions\AuthGroupAlreadyExists
      */
-    public function createNewAuthGroup(array $attributes = []): AuthGroup
+    public function createNewAuthGroup(string $name, string $description = null): AuthGroup
     {
         if ($this->canOwnAuthGroups()) {
-            return $this->switchToAuthGroup(
-                AuthGroup::create(
-                    array_merge($attributes, [
-                        'owner_id' => $this->id
-                    ])
-                )
-            );
+            $authGroup = AuthGroup::create([
+                'name' => $name,
+                'description' => $description,
+                'owner_id' => $this->id,
+            ]);
+
+            $role = config('laravel-permissions.auth_group_users.roles.owner');
+
+            $this->authGroups()->save($authGroup, ['role' => $role]);
+
+            return $this->switchToAuthGroup($authGroup);
         }
 
         throw new UserCannotOwnAuthGroups;
@@ -172,20 +209,17 @@ trait InteractsWithAuthGroups
     }
 
     /**
-     * @param array ...$groups
+     * @param $group
+     * @param string $role
      * @return $this
      */
-    public function joinAuthGroup(...$groups)
+    public function joinAuthGroup($group, string $role = 'User')
     {
-        $groups = collect($groups)
-            ->flatten()
-            ->map(function ($group) {
-                return $this->getAuthGroup($group);
-            });
+        $group = $this->getAuthGroup($group);
 
-        $this->authGroups()->saveMany($groups->all());
+        $this->authGroups()->save($group, ['role' => $role]);
 
-        app(PermissionLoader::class)->forgetCachedPermissions();
+        app(Loader::class)->forgetCachedPermissions();
 
         return $this;
     }
@@ -273,7 +307,7 @@ trait InteractsWithAuthGroups
     public function isOneOfAny($groups): bool
     {
         if (is_string($groups) && (false !== strpos($groups, '|') || false !== strpos($groups, ','))) {
-            $groups = $this->convertPipeToArray($groups);
+            $groups = $this->convertToArray($groups);
         }
 
         if (is_string($groups)) {
@@ -304,7 +338,7 @@ trait InteractsWithAuthGroups
     public function isOneOfAll($groups): bool
     {
         if ($this->isListOfGroups($groups)) {
-            $groups = $this->convertPipeToArray($groups);
+            $groups = $this->convertToArray($groups);
         }
 
         if (is_string($groups)) {
@@ -429,14 +463,6 @@ trait InteractsWithAuthGroups
     }
 
     /**
-     * @return MorphToMany
-     */
-    public function authGroups(): BelongsToMany
-    {
-        return $this->belongsToMany(AuthGroup::class, 'auth_group_users');
-    }
-
-    /**
      * @return Collection
      */
     public function getDirectPermissions(): Collection
@@ -469,27 +495,27 @@ trait InteractsWithAuthGroups
         return $group;
     }
 
-    protected function convertPipeToArray(string $pipeString)
+    protected function convertToArray(string $string)
     {
-        $pipeString = str_replace(',', '|', trim($pipeString));
+        $string = str_replace(',', '|', trim($string));
 
-        if (strlen($pipeString) <= 2) {
-            return $pipeString;
+        if (strlen($string) <= 2) {
+            return $string;
         }
 
-        $quoteCharacter = substr($pipeString, 0, 1);
+        $quoteCharacter = substr($string, 0, 1);
 
         $endCharacter = substr($quoteCharacter, -1, 1);
 
         if ($quoteCharacter !== $endCharacter) {
-            return explode('|', $pipeString);
+            return explode('|', $string);
         }
 
         if (! in_array($quoteCharacter, ["'", '"'])) {
-            return explode('|', $pipeString);
+            return explode('|', $string);
         }
 
-        return explode('|', trim($pipeString, $quoteCharacter));
+        return explode('|', trim($string, $quoteCharacter));
     }
 
     /**
@@ -510,6 +536,27 @@ trait InteractsWithAuthGroups
             }
 
             return Permission::findByName($permission);
+        });
+    }
+
+    /**
+     * @param $groups
+     * @return Collection
+     */
+    protected function resolveAuthGroups($groups): Collection
+    {
+        if ($groups instanceof Collection) {
+            return $groups;
+        }
+
+        $groups = collect($groups);
+
+        return $groups->map(function($group) {
+            if ($group instanceof AuthGroup) {
+                return $group;
+            }
+
+            return AuthGroup::findByName($group);
         });
     }
 

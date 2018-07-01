@@ -70,18 +70,15 @@ $userB->hasPermissionTo('edit-blog'); // true
 $userB->isAllowedTo('edit-articles'); // true
 ```
 
-User can create personal or team auth group. Note that there is a `canOwnAuthGroups` method on
+User can create private groups or basically teams. Note that there is a `canOwnAuthGroups` method on
 `InteractsWithAuthGroups` trait that returns `true` by default. If you want to define some custom rules on
 whether this or that user is allowed to create auth groups, which you probably do, you need to 
 override that method in your user model.
  
 ```php
-$authGroup = $this->owner->createNewAuthGroup([
-    'name' => 'Acme',
-    'description' => 'My company auth group',
-]);
+$privateGroup = $this->owner->createNewAuthGroup('My private group', 'My private group description');
 
-$authGroup
+$privateGroup
     ->addUser($this->userA)
     ->addUser($this->userB);
 ```

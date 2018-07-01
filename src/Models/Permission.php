@@ -4,7 +4,7 @@ namespace Denismitr\Permissions\Models;
 
 use Denismitr\Permissions\Exceptions\PermissionAlreadyExists;
 use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
-use Denismitr\Permissions\PermissionLoader;
+use Denismitr\Permissions\Loader;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Collection;
@@ -26,7 +26,7 @@ class Permission extends Model
             }
         })->first();
 
-        app(PermissionLoader::class)->forgetCachedPermissions();
+        app(Loader::class)->forgetCachedPermissions();
 
         return static::query()->create($attributes);
     }
@@ -120,7 +120,7 @@ class Permission extends Model
      */
     public static function getPermissions(): Collection
     {
-        return app(PermissionLoader::class)->getPermissions();
+        return app(Loader::class)->getPermissions();
     }
 
     /**

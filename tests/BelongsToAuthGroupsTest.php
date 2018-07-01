@@ -46,4 +46,27 @@ class BelongsToAuthGroupsTest extends TestCase
         $this->assertFalse($userB->hasPermissionTo('edit-blog'));
         $this->assertFalse($userB->isAllowedTo('edit-articles'));
     }
+
+    /** @test */
+    public function user_can_belong_to_multiple_auth_groups()
+    {
+        // Given we have several auth groups and a user
+        $bloggers = AuthGroup::create(['name' => 'bloggers']);
+        $editors = AuthGroup::create(['name' => 'editors']);
+
+        /** @var User $user */
+        $user = User::create(['email' => 'user.a@test.com']);
+        $privateGroup = $user->createNewAuthGroup('private group');
+
+        $user->joinAuthGroup($bloggers, 'Invited user');
+        $user->joinAuthGroup($editors, 'Supervisor');
+
+        $userGroups = $user->fresh()->authGroups;
+
+        $this->assertCount(3, $userGroups);
+
+        $userGroups->assertContains($bloggers);
+        $userGroups->assertContains($editors);
+        $userGroups->assertContains($privateGroup);
+    }
 }
