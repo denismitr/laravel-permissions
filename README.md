@@ -86,6 +86,7 @@ $privateGroup
     
 $authGroup->hasUser($this->userA); // true
 $authGroup->isOwnedBy($this->owner); // true
+$this->owner->ownsAuthGroup($authGroup); // true
 
 $authGroup->forUser($this->userA)->allowTo('edit-articles');
 ```
