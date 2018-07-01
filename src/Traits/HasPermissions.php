@@ -6,7 +6,7 @@ namespace Denismitr\Permissions\Traits;
 
 use Denismitr\Permissions\Exceptions\PermissionDoesNotExist;
 use Denismitr\Permissions\Models\Permission;
-use Denismitr\Permissions\PermissionLoader;
+use Denismitr\Permissions\Loader;
 
 trait HasPermissions
 {
@@ -24,7 +24,7 @@ trait HasPermissions
 
         $this->permissions()->saveMany($permissions);
 
-        app(PermissionLoader::class)->forgetCachedPermissions();
+        app(Loader::class)->forgetCachedPermissions();
 
         $this->load('permissions');
 
@@ -40,7 +40,7 @@ trait HasPermissions
     {
         $this->permissions()->detach($this->getPermission($permission));
 
-        app(PermissionLoader::class)->forgetCachedPermissions();
+        app(Loader::class)->forgetCachedPermissions();
 
         $this->load('permissions');
 

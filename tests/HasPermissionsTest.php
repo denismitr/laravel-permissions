@@ -75,7 +75,13 @@ class HasPermissionsTest extends TestCase
         $scopedUsers2 = User::withPermissions(['edit-news'])->get();
 
         $this->assertEquals(2, $scopedUsers1->count());
-//        $this->assertEquals($scopedUsers2->count(), 1);
+        $this->assertEquals($scopedUsers2->count(), 1);
+
+        $scopedUsers1 = User::allowed('edit-articles')->get();
+        $scopedUsers2 = User::allowed(['edit-news'])->get();
+
+        $this->assertEquals(2, $scopedUsers1->count());
+        $this->assertEquals($scopedUsers2->count(), 1);
     }
 
 }

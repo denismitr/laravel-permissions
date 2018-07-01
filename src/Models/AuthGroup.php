@@ -6,10 +6,12 @@ namespace Denismitr\Permissions\Models;
 use Denismitr\Permissions\Contracts\UserRole;
 use Denismitr\Permissions\Exceptions\AuthGroupAlreadyExists;
 use Denismitr\Permissions\Exceptions\AuthGroupDoesNotExist;
+use Denismitr\Permissions\Exceptions\AuthGroupUserNotFound;
 use Denismitr\Permissions\Traits\AuthGroupPermissions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class AuthGroup extends Model implements UserRole
@@ -17,6 +19,10 @@ class AuthGroup extends Model implements UserRole
     use AuthGroupPermissions;
 
     protected $guarded = ['id'];
+
+    protected $casts = [
+        'owner_id' => 'integer'
+    ];
 
     /**
      * @param array $attributes
@@ -54,6 +60,36 @@ class AuthGroup extends Model implements UserRole
     public function owner(): BelongsTo
     {
         return $this->belongsTo(config('permissions.models.user'));
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function permissions(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class,
+            config('permissions.tables.auth_group_permissions')
+        );
+    }
+
+
+    /**
+     * @return BelongsToMany
+     */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            config('permissions.models.user'),
+            'auth_group_users'
+        );
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function authGroupUsers(): HasMany
+    {
+        return $this->hasMany(AuthGroupUser::class, 'auth_group_id');
     }
 
     /*
@@ -151,28 +187,6 @@ class AuthGroup extends Model implements UserRole
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
-     */
-    public function permissions(): BelongsToMany
-    {
-        return $this->belongsToMany(Permission::class,
-            config('permissions.tables.auth_group_permissions')
-        );
-    }
-
-
-    /**
-     * @return BelongsToMany
-     */
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            config('permissions.models.user'),
-            'auth_group_users'
-        );
-    }
-
-    /**
      *  Verify if role has a permission
      *
      * @param  string $permission
@@ -186,6 +200,37 @@ class AuthGroup extends Model implements UserRole
 
         return !! $this->permissions->where('name', $permission)->count();
     }
+
+    /**
+     * @param $user
+     * @return bool
+     */
+    public function hasUser($user): bool
+    {
+        return $this->users->contains($user);
+    }
+
+    public function isOwnedBy($user): bool
+    {
+        return $this->owner_id === (int) $user->id;
+    }
+
+    /**
+     * @param $user
+     * @return AuthGroupUser
+     * @throws AuthGroupUserNotFound
+     */
+    public function forUser($user): AuthGroupUser
+    {
+        $authGroupUser = $this->authGroupUsers()->where('user_id', $user->id)->first();
+
+        if ( ! $authGroupUser) {
+            throw new AuthGroupUserNotFound("Auth group user with email `{$user->email}` not found!");
+        }
+
+        return $authGroupUser;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Actions
@@ -194,9 +239,10 @@ class AuthGroup extends Model implements UserRole
 
     /**
      * @param $user
+     * @param string $role
      * @return AuthGroup
      */
-    public function addUser($user): self
+    public function addUser($user, string $role = 'User'): self
     {
         $model = config('permissions.models.user');
 
@@ -206,7 +252,7 @@ class AuthGroup extends Model implements UserRole
             );
         }
 
-        $this->users()->save($user);
+        $this->users()->save($user, ['role' => $role]);
 
         return $this;
     }

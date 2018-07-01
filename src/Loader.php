@@ -11,7 +11,7 @@ use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Collection;
 
-class PermissionLoader
+class Loader
 {
     /** @var Gate */
     protected $gate;
@@ -25,7 +25,7 @@ class PermissionLoader
     protected $cacheKey = 'denismitr.permissions.cache';
 
     /**
-     * PermissionLoader constructor.
+     * Loader constructor.
      * @param Gate $gate
      * @param Repository $cache
      */

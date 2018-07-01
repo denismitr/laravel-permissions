@@ -12,10 +12,10 @@ class PermissionsServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application services.
      *
-     * @param PermissionLoader $permissionLoader
+     * @param Loader $permissionLoader
      * @return void
      */
-    public function boot(PermissionLoader $permissionLoader)
+    public function boot(Loader $permissionLoader)
     {
         if ( ! is_lumen()) {
             $this->publishes([
