@@ -31,7 +31,6 @@ This one insures that user belongs to all required auth groups
 Then run `php artisan migrate` and the following _5_ tables will be created:
 * auth_groups
 * permissions
-* user_permissions
 * auth_group_users
 * auth_group_permissions
 

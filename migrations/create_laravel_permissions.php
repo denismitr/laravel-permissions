@@ -100,7 +100,6 @@ class CreateLaravelPermissions extends Migration
     public function down()
     {
         Schema::dropIfExists('auth_group_users');
-        Schema::dropIfExists('user_permissions');
         Schema::dropIfExists('auth_group_permissions');
         Schema::dropIfExists('permissions');
         Schema::dropIfExists('auth_groups');
