@@ -123,8 +123,21 @@ class AuthGroupsOwnershipTest extends TestCase
 
         $authGroup->forUser($this->userA)->allowTo('edit-articles');
         $this->assertTrue($this->userA->isAllowedTo('edit-articles'));
+        $this->assertFalse($this->userB->isAllowedTo('edit-articles'));
 
         $authGroup->forUser($this->userB)->grantPermissionTo('edit-blog');
         $this->assertTrue($this->userB->can('edit-blog'));
+        $this->assertFalse($this->userA->can('edit-blog'));
+    }
+
+    /** @test */
+    public function owner_permissions_on_auth_group()
+    {
+        // Given we have a private auth group
+        $authGroup = $this->owner->createNewAuthGroup('Acme');
+
+        $this->assertTrue($authGroup->isOwnedBy($this->owner));
+
+        $this->assertTrue($this->owner->ownsAuthGroup($authGroup));
     }
 }

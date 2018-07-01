@@ -292,6 +292,15 @@ trait InteractsWithAuthGroups
     }
 
     /**
+     * @param AuthGroup $authGroup
+     * @return bool
+     */
+    public function ownsAuthGroup(AuthGroup $authGroup): bool
+    {
+        return $authGroup->isOwnedBy($this);
+    }
+
+    /**
      * @param $groups
      * @return bool
      */
