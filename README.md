@@ -83,6 +83,9 @@ $privateGroup = $this->owner->createNewAuthGroup('My private group', 'My private
 $privateGroup
     ->addUser($this->userA)
     ->addUser($this->userB);
+    
+$authGroup->hasUser($this->userA); // true
+$authGroup->isOwnedBy($this->owner); // true
 ```
 
 #### Roles

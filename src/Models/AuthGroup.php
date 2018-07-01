@@ -18,6 +18,10 @@ class AuthGroup extends Model implements UserRole
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'owner_id' => 'integer'
+    ];
+
     /**
      * @param array $attributes
      * @return $this|Model
@@ -186,6 +190,21 @@ class AuthGroup extends Model implements UserRole
 
         return !! $this->permissions->where('name', $permission)->count();
     }
+
+    /**
+     * @param $user
+     * @return bool
+     */
+    public function hasUser($user): bool
+    {
+        return $this->users->contains($user);
+    }
+
+    public function isOwnedBy($user): bool
+    {
+        return $this->owner_id === (int) $user->id;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Actions
@@ -194,9 +213,10 @@ class AuthGroup extends Model implements UserRole
 
     /**
      * @param $user
+     * @param string $role
      * @return AuthGroup
      */
-    public function addUser($user): self
+    public function addUser($user, string $role = 'User'): self
     {
         $model = config('permissions.models.user');
 
@@ -206,7 +226,7 @@ class AuthGroup extends Model implements UserRole
             );
         }
 
-        $this->users()->save($user);
+        $this->users()->save($user, ['role' => $role]);
 
         return $this;
     }
