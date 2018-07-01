@@ -70,6 +70,8 @@ $userB->hasPermissionTo('edit-blog'); // true
 $userB->isAllowedTo('edit-articles'); // true
 ```
 
+#### Private groups and/or teams
+
 User can create private groups or basically teams. Note that there is a `canOwnAuthGroups` method on
 `InteractsWithAuthGroups` trait that returns `true` by default. If you want to define some custom rules on
 whether this or that user is allowed to create auth groups, which you probably do, you need to 
@@ -83,12 +85,30 @@ $privateGroup
     ->addUser($this->userB);
 ```
 
-To withdraw permissions
+#### Roles
+
+roles are just strings and they are supposed to be used just as additional helpers.
+
+```php
+$user->onAuthGroup($privateGroup)->getRole(); // Owner (this one can be setup in config of the package)
+
+$user->joinAuthGroup($bloggers, 'Invited user');
+$user->joinAuthGroup($editors, 'Supervisor');
+
+$user->onAuthGroup($editors)->getRole(); // 'Invited user'
+$user->onAuthGroup($privateGroup)->getRole(); // 'Supervisor'
+
+$user->onAuthGroup($bloggers)->hasRole('Invited user'); // true
+$user->onAuthGroup($editors)->hasRole('Supervisor'); // true
+$user->onAuthGroup($privateGroup)->hasRole('Pinguin'); // false
+```
+
+#### To withdraw permissions
 ```php
 $authGroup->revokePermissionTo('delete post', 'edit post');
 ```
 
-Grant permission through auth group:
+#### Grant permission through auth group:
 ```php
 $admin->joinAuthGroup('admins'); // group must already exist
 
@@ -103,7 +123,7 @@ $admin->onAuthGroup('admins')->givePermissionTo('administrate-blog');
 $blogAdminPermission->isGrantedFor($this->admin);
 ```
 
-To check for permissions:
+#### To check for permissions:
 ```php
 $user->hasPermissionTo('edit post', 'delete post');
 $user->can('delete post');

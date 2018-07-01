@@ -68,5 +68,14 @@ class BelongsToAuthGroupsTest extends TestCase
         $userGroups->assertContains($bloggers);
         $userGroups->assertContains($editors);
         $userGroups->assertContains($privateGroup);
+
+        $this->assertEquals('Invited user', $user->onAuthGroup($bloggers)->getRole());
+        $this->assertEquals('Supervisor', $user->onAuthGroup($editors)->getRole());
+        $this->assertEquals('Owner', $user->onAuthGroup($privateGroup)->getRole());
+
+        $this->assertTrue($user->onAuthGroup($bloggers)->hasRole('Invited user'));
+        $this->assertTrue($user->onAuthGroup($editors)->hasRole('Supervisor'));
+        $this->assertTrue($user->onAuthGroup($privateGroup)->hasRole('Owner'));
+        $this->assertFalse($user->onAuthGroup($privateGroup)->hasRole('Pinguin'));
     }
 }

@@ -74,4 +74,21 @@ class AuthGroupUser extends Model
 
         return $found;
     }
+
+    /**
+     * @param string $role
+     * @return bool
+     */
+    public function hasRole(string $role): bool
+    {
+        return $role === $this->getRole();
+    }
+
+    /**
+     * @return string
+     */
+    public function getRole(): string
+    {
+        return $this->role;
+    }
 }

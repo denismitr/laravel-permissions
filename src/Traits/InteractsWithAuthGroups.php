@@ -160,7 +160,7 @@ trait InteractsWithAuthGroups
                 'owner_id' => $this->id,
             ]);
 
-            $role = config('laravel-permissions.auth_group_users.roles.owner');
+            $role = config('permissions.auth_group_users.roles.owner');
 
             $this->authGroups()->save($authGroup, ['role' => $role]);
 
