@@ -48,6 +48,15 @@ class AuthGroup extends Model implements UserRole
         return static::findByName($name);
     }
 
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public static function existsWithName(string $name): bool
+    {
+        return !! static::query()->whereName($name)->first();
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Relationships
@@ -121,13 +130,13 @@ class AuthGroup extends Model implements UserRole
      */
     public static function findByName(string $name): self
     {
-        $role = static::query()->whereName($name)->first();
+        $authGroup = static::query()->whereName($name)->first();
 
-        if ( ! $role ) {
+        if ( ! $authGroup ) {
             throw AuthGroupDoesNotExist::create($name);
         }
 
-        return $role;
+        return $authGroup;
     }
 
     /**
@@ -137,33 +146,33 @@ class AuthGroup extends Model implements UserRole
      */
     public static function findById(int $id): self
     {
-        /** @var AuthGroup $role */
-        $role = static::query()->find($id);
+        /** @var AuthGroup $authGroup */
+        $authGroup = static::query()->find($id);
 
-        if ( ! $role ) {
+        if ( ! $authGroup ) {
             throw AuthGroupDoesNotExist::createWithId($id);
         }
 
-        return $role;
+        return $authGroup;
     }
 
     /**
-     * @param $authGroup
+     * @param $value
      * @return AuthGroup
      * @throws AuthGroupDoesNotExist
      */
-    public static function find($authGroup)
+    public static function find($value)
     {
-        if ( is_numeric($authGroup) ) {
-            return static::findById($authGroup);
+        if ( is_numeric($value) ) {
+            return static::findById($value);
         }
 
-        if (is_string($authGroup)) {
-            return static::findByName($authGroup);
+        if (is_string($value)) {
+            return static::findByName($value);
         }
 
-        if ($authGroup instanceof AuthGroup) {
-            return $authGroup;
+        if ($value instanceof AuthGroup) {
+            return $value;
         }
 
         throw new AuthGroupDoesNotExist();
@@ -177,17 +186,17 @@ class AuthGroup extends Model implements UserRole
      */
     public static function findOrCreate(string $name, $guard = null): UserRole
     {
-        $role = static::query()->whereName('name', $name)->first();
+        $authGroup = static::query()->whereName('name', $name)->first();
 
-        if ( ! $role) {
+        if ( ! $authGroup) {
             return static::create(['name' => $name]);
         }
 
-        return $role;
+        return $authGroup;
     }
 
     /**
-     *  Verify if role has a permission
+     *  Verify if authGroup has a permission
      *
      * @param  string $permission
      * @return bool

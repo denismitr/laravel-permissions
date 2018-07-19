@@ -47,6 +47,17 @@ class AuthGroupTest extends TestCase
         $authGroup = AuthGroup::create(['name' => 'New auth group']);
     }
 
+    /** @test */
+    public function it_can_verify_if_auth_group_already_exists()
+    {
+        // Given
+        AuthGroup::create(['name' => 'AG 1']);
+        AuthGroup::create(['name' => 'AG 2']);
+
+        $this->assertTrue(AuthGroup::existsWithName('AG 2'));
+        $this->assertFalse(AuthGroup::existsWithName('AG 3'));
+    }
+
     /**
      * @test
      * @throws AuthGroupAlreadyExists
