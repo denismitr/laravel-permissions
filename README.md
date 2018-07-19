@@ -26,6 +26,12 @@ Then if you need to use one of the provided middleware, you can add a `auth.grou
 ```
 This one insures that user belongs to all required auth groups
 
+### Publish config and migrations
+```bash
+php artisan vendor:publish
+```
+and pick `Provider: Denismitr\Permissions\PermissionsServiceProvider` from the list
+
 ### Migration
 
 Then run `php artisan migrate` and the following _5_ tables will be created:

@@ -46,7 +46,7 @@ class CreateLaravelPermissions extends Migration
                 ->on('auth_groups')
                 ->onDelete('cascade');
 
-            $table->unique(['permission_id', 'auth_group_id']);
+            $table->unique(['permission_id', 'auth_group_id'], 'lp_agp_unique');
         });
 
         Schema::create('auth_group_users', function (Blueprint $table) {
@@ -65,7 +65,7 @@ class CreateLaravelPermissions extends Migration
                 ->on('users')
                 ->onDelete('cascade');
 
-            $table->unique(['user_id', 'auth_group_id']);
+            $table->unique(['user_id', 'auth_group_id'], 'lp_agu_unique');
         });
 
         Schema::create('auth_group_user_permissions', function (Blueprint $table) {
@@ -84,7 +84,7 @@ class CreateLaravelPermissions extends Migration
                 ->on('permissions')
                 ->onDelete('cascade');
 
-            $table->unique(['auth_group_user_id', 'permission_id']);
+            $table->unique(['auth_group_user_id', 'permission_id'], 'lp_agup_unique');
         });
 
         Schema::table(config('permissions.tables.users'), function (Blueprint $table) {
