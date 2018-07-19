@@ -69,6 +69,11 @@ $userB->hasPermissionTo('edit-blog'); // true
 $userB->isAllowedTo('edit-articles'); // true
 ```
 
+##### Check if auth group already exists
+```php
+AuthGroup::existsWithName('accountants'); // returns true or false
+```
+
 #### Private groups and/or teams
 
 User can create private groups or basically teams. Note that there is a `canOwnAuthGroups` method on
