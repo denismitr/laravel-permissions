@@ -1,4 +1,4 @@
-## Version 2.0 Alfa
+## Version 2.0 Beta
 
 ## Laravel Permissions
 
@@ -210,4 +210,3 @@ Some other directives
 
 ### Author
 Denis Mitrofanov
-[TheCollection.ru](https://thecollection.ru)
