@@ -1,4 +1,4 @@
-## Version 2.0 Beta
+## Version 2.0
 
 ## Laravel Permissions
 
