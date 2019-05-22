@@ -64,7 +64,7 @@ abstract class TestCase extends OrchestraTestCase
     protected $blogAdminPermission;
 
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -103,7 +103,7 @@ abstract class TestCase extends OrchestraTestCase
             $table->string('email');
         });
 
-        include_once __DIR__.'/../migrations/create_laravel_permissions.php';
+        include_once __DIR__ . '/../migrations/create_laravel_permissions.php';
 
         (new \CreateLaravelPermissions())->up();
 
@@ -146,36 +146,36 @@ abstract class TestCase extends OrchestraTestCase
 
     protected function createMacros()
     {
-        Collection::macro('assertContains', function($value) {
+        Collection::macro('assertContains', function ($value) {
             Assert::assertTrue(
                 $this->contains($value),
                 "Failed asserting that the collection contains the specified value."
             );
         });
 
-        Collection::macro('assertNotContains', function($value) {
+        Collection::macro('assertNotContains', function ($value) {
             Assert::assertFalse(
                 $this->contains($value),
                 "Failed asserting that the collection does not contain the specified value."
             );
         });
 
-        Collection::macro('assertSame', function($items) {
+        Collection::macro('assertSame', function ($items) {
             Assert::assertEquals(count($this), count($items));
-            $this->zip($items)->each(function($pair) {
+            $this->zip($items)->each(function ($pair) {
                 [$a, $b] = $pair;
                 Assert::assertTrue($a->is($b));
             });
         });
 
-        Collection::macro('assertHasAll', function($items) {
+        Collection::macro('assertHasAll', function ($items) {
             Assert::assertTrue(count($this) >= count($items));
-            $items->each(function($item) use ($items) {
+            $items->each(function ($item) use ($items) {
                 Assert::assertTrue($this->contains($item));
             });
         });
 
-        Collection::macro('assertCount', function($count) {
+        Collection::macro('assertCount', function ($count) {
             Assert::assertEquals($count, count($this));
         });
     }

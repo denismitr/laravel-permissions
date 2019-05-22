@@ -30,7 +30,7 @@ class AuthGroupsOwnershipTest extends TestCase
      */
     protected $wrongUser;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -50,7 +50,7 @@ class AuthGroupsOwnershipTest extends TestCase
     public function user_can_create_a_private_auth_group()
     {
         // Given we have a private auth group
-        $authGroup = $this->owner->createNewAuthGroup('Acme','My company auth group');
+        $authGroup = $this->owner->createNewAuthGroup('Acme', 'My company auth group');
 
         // Do invite users to the group
         $authGroup
@@ -78,7 +78,7 @@ class AuthGroupsOwnershipTest extends TestCase
     public function owner_can_give_users_permissions_through_the_team()
     {
         // Given we have a private auth group
-        $authGroup = $this->owner->createNewAuthGroup('Acme','My company auth group');
+        $authGroup = $this->owner->createNewAuthGroup('Acme', 'My company auth group');
 
         // Do invite users to the group
         $authGroup
@@ -114,7 +114,7 @@ class AuthGroupsOwnershipTest extends TestCase
     public function owner_can_grand_permissions_for_each_user_on_the_private_group()
     {
         // Given we have a private auth group
-        $authGroup = $this->owner->createNewAuthGroup('Acme','My company auth group');
+        $authGroup = $this->owner->createNewAuthGroup('Acme', 'My company auth group');
 
         // Do invite users to the group
         $authGroup

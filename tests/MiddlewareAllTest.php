@@ -23,7 +23,7 @@ class MiddlewareAllTest extends TestCase
      */
     protected $allMiddleware;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -33,8 +33,10 @@ class MiddlewareAllTest extends TestCase
     /** @test */
     public function a_guest_cannot_access_a_route_protected_by_auth_group_middleware()
     {
-        $this->assertEquals(401,
-            $this->runMiddleware($this->allMiddleware, 'admins'));
+        $this->assertEquals(
+            401,
+            $this->runMiddleware($this->allMiddleware, 'admins')
+        );
     }
 
     /** @test */
@@ -50,7 +52,8 @@ class MiddlewareAllTest extends TestCase
         $this->be($user);
 
         $response = $this->runMiddleware(
-            $this->allMiddleware, 'editors'
+            $this->allMiddleware,
+            'editors'
         );
 
         // Expect OK
@@ -72,15 +75,18 @@ class MiddlewareAllTest extends TestCase
         $this->be($user);
 
         $responseA = $this->runMiddleware(
-            $this->allMiddleware, 'editors|staff'
+            $this->allMiddleware,
+            'editors|staff'
         );
 
         $responseB = $this->runMiddleware(
-            $this->allMiddleware, ['editors', 'staff']
+            $this->allMiddleware,
+            ['editors', 'staff']
         );
 
         $responseC = $this->runMiddleware(
-            $this->allMiddleware, 'editors,staff'
+            $this->allMiddleware,
+            'editors,staff'
         );
 
         // Expect OK
@@ -102,15 +108,18 @@ class MiddlewareAllTest extends TestCase
         $this->be($user);
 
         $responseA = $this->runMiddleware(
-            $this->allMiddleware, 'staff'
+            $this->allMiddleware,
+            'staff'
         );
 
         $responseB = $this->runMiddleware(
-            $this->allMiddleware, 'non-existent'
+            $this->allMiddleware,
+            'non-existent'
         );
 
         $responseC = $this->runMiddleware(
-            $this->allMiddleware, 'editors|staff'
+            $this->allMiddleware,
+            'editors|staff'
         );
 
         // Expect OK
@@ -132,15 +141,18 @@ class MiddlewareAllTest extends TestCase
         $this->be($user);
 
         $responseA = $this->runMiddleware(
-            $this->allMiddleware, 'staff'
+            $this->allMiddleware,
+            'staff'
         );
 
         $responseB = $this->runMiddleware(
-            $this->allMiddleware, 'non-existent'
+            $this->allMiddleware,
+            'non-existent'
         );
 
         $responseC = $this->runMiddleware(
-            $this->allMiddleware, 'editors|staff'
+            $this->allMiddleware,
+            'editors|staff'
         );
 
         // Expect OK
@@ -152,7 +164,7 @@ class MiddlewareAllTest extends TestCase
     protected function runMiddleware($middleware, $parameters)
     {
         try {
-            return $middleware->handle(new Request(), function() {
+            return $middleware->handle(new Request(), function () {
                 return (new Response())->setContent('<html></html>');
             }, $parameters)->status();
         } catch (UnauthorizedException $e) {

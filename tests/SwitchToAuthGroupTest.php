@@ -15,7 +15,7 @@ use Denismitr\Permissions\Test\Models\User;
 
 class SwitchToAuthGroupTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -88,24 +88,23 @@ class SwitchToAuthGroupTest extends TestCase
         ]);
     }
 
-     /** @test */
-     public function it_can_get_current_auth_group_name_from_user()
-     {
+    /** @test */
+    public function it_can_get_current_auth_group_name_from_user()
+    {
         // Given
         $user = User::create(['email' => 'new@user.com']);
- 
+
         $authGroupA = AuthGroup::create(['name' => 'Auth group A']);
         $authGroupB = AuthGroup::create(['name' => 'Auth group B']);
- 
+
         // Do that
         $user->joinAuthGroup($authGroupA);
         $user->joinAuthGroup($authGroupB);
 
         // Do switch to authGroupB
         $user->switchToAuthGroup($authGroupB);
- 
+
         // Expect currentAuthGroupName to be that of $authGroupB
         $this->assertEquals('Auth group B', $user->currentAuthGroupName());
-     }
-
+    }
 }

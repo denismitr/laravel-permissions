@@ -26,12 +26,12 @@ class BladeDirectivesTest extends TestCase
     /** @var AuthGroup */
     private $writers;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
         // Views for testing
-        $finder = new \Illuminate\View\FileViewFinder(app()['files'], array(__DIR__.'/views'));
+        $finder = new \Illuminate\View\FileViewFinder(app()['files'], array(__DIR__ . '/views'));
         View::setFinder($finder);
 
         $this->authors = AuthGroup::create(['name' => 'authors']);
@@ -48,15 +48,15 @@ class BladeDirectivesTest extends TestCase
     public function all_blade_directives_will_evaluate_to_false_for_guest_user()
     {
         $permission = 'update-something';
-        
+
         $this->assertEquals('does not have permission', $this->renderView('can', ['permission' => $permission]));
         $this->assertEquals('does not belong to auth group', $this->renderView('authgroup', ['group' => 'admins']));
         $this->assertEquals('does not belong to auth group', $this->renderView('isoneof', ['group' => 'users']));
         $this->assertEquals('does not belong to team', $this->renderView('team', ['group' => 'writers']));
         $this->assertEquals('does not belong to any of the auth groups', $this->renderView('isoneofany', ['group' => 'admins,users']));
-        $this->assertEquals('does not belong to all of the auth groups', $this->renderView('isoneofall', ['group' => ['admins','users']]));
+        $this->assertEquals('does not belong to all of the auth groups', $this->renderView('isoneofall', ['group' => ['admins', 'users']]));
     }
-    
+
     /** @test */
     public function can_blade_directives_will_evaluate_to_true_if_logged_user_has_permission_via_auth_group()
     {
@@ -114,7 +114,7 @@ class BladeDirectivesTest extends TestCase
         $this->assertEquals('belongs to team', $this->renderView('team', ['team' => 'bloggers']));
         $this->assertEquals('belongs to auth group', $this->renderView('isoneof', ['group' => 'writers|bloggers']));
         $this->assertEquals('belongs to one of the auth groups', $this->renderView('isoneofany', ['group' => 'authors,writers,bloggers,admins']));
-        $this->assertEquals('belongs to all of the auth groups', $this->renderView('isoneofall', ['group' => ['writers','bloggers']]));
+        $this->assertEquals('belongs to all of the auth groups', $this->renderView('isoneofall', ['group' => ['writers', 'bloggers']]));
     }
 
     protected function renderView(string $view, array $parameters)
@@ -123,6 +123,6 @@ class BladeDirectivesTest extends TestCase
 
         $view = view($view)->with($parameters);
 
-        return trim((string) $view);
+        return trim((string)$view);
     }
 }

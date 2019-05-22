@@ -15,7 +15,7 @@ use Denismitr\Permissions\Test\Models\User;
 
 class AuthGroupTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -87,7 +87,7 @@ class AuthGroupTest extends TestCase
         app(AuthGroup::class)->create(['name' => 'test-role']);
         app(AuthGroup::class)->create(['name' => 'test-role']);
     }
-    
+
     /** @test */
     public function it_can_be_given_a_permission()
     {
@@ -114,7 +114,7 @@ class AuthGroupTest extends TestCase
         $this->assertTrue($this->usersGroup->hasPermissionTo('edit-articles'));
         $this->assertTrue($this->usersGroup->hasPermissionTo('edit-news'));
     }
-    
+
     /** @test */
     public function it_can_sync_permissions()
     {
@@ -226,7 +226,7 @@ class AuthGroupTest extends TestCase
         $this->assertCount(1, $authGroup->users);
         $this->assertTrue($authGroup->users->first()->is($this->user));
     }
-    
+
     /** @test */
     public function multiple_users_can_be_added_to_auth_group()
     {
