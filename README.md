@@ -1,8 +1,8 @@
-## Version 2.0
+## Version 2.1
 
 ## Laravel Permissions
 
-This is a package to integrate with Laravel 5.5 - 5.6
+This is a package to integrate with Laravel 5.5 - 5.8
 
 ## Installation
 
